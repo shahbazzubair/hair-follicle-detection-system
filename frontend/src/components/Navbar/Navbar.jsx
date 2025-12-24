@@ -1,0 +1,41 @@
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import styles from './Navbar.module.css';
+
+function Navbar() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  return (
+    <nav className={styles.navbar}>
+      <div className={styles.container}>
+        <Link to="/" className={styles.logo} onClick={() => setIsMenuOpen(false)}>
+          HFD<span>AI</span>
+        </Link>
+        
+        {/* Hamburger Icon for Mobile */}
+        <div className={styles.menuIcon} onClick={toggleMenu}>
+          <div className={`${styles.bar} ${isMenuOpen ? styles.bar1 : ''}`}></div>
+          <div className={`${styles.bar} ${isMenuOpen ? styles.bar2 : ''}`}></div>
+          <div className={`${styles.bar} ${isMenuOpen ? styles.bar3 : ''}`}></div>
+        </div>
+
+        <div className={`${styles.rightSection} ${isMenuOpen ? styles.showMenu : ''}`}>
+          <ul className={styles.navLinks}>
+            <li><a href="#technology" onClick={toggleMenu}>Technology</a></li>
+            <li><a href="#research" onClick={toggleMenu}>Research</a></li>
+            <li><a href="#pricing" onClick={toggleMenu}>Pricing</a></li>
+          </ul>
+          
+          <div className={styles.authButtons}>
+            <Link to="/login" className={styles.loginBtn} onClick={toggleMenu}>Login</Link>
+            <Link to="/signup" className={styles.signupBtn} onClick={toggleMenu}>Sign Up</Link>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+export default Navbar;

@@ -1,0 +1,44 @@
+/* src/components/Footer/Footer.module.css */
+
+footer {
+  width: 100%;
+  background-color: #ffffff; /* Clean white background to match your professional theme [cite: 38] */
+  border-top: 1px solid #e2e8f0;
+  padding: 30px 0;
+  margin-top: auto; /* Works with flexbox in App.css to stay at bottom */
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #64748b; /* Professional slate gray color */
+  font-size: 0.9rem;
+}
+
+.legalLinks {
+  display: flex;
+  gap: 24px;
+}
+
+.legalLinks a {
+  text-decoration: none;
+  color: #64748b;
+  transition: color 0.2s ease;
+}
+
+.legalLinks a:hover {
+  color: #2563eb; /* Primary blue color from your SDS [cite: 184] */
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+}
