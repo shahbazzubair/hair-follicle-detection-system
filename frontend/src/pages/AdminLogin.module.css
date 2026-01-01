@@ -1,0 +1,46 @@
+.adminWrapper {
+  background: #0f172a; /* Dark, professional theme */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loginCard {
+  background: #ffffff;
+  padding: 50px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.lockIcon { font-size: 3rem; margin-bottom: 20px; }
+.loginCard h2 { color: #1e293b; margin-bottom: 10px; }
+.loginCard p { color: #64748b; margin-bottom: 30px; font-size: 0.9rem; }
+
+.form { display: flex; flex-direction: column; gap: 20px; }
+
+.inputGroup input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  outline: none;
+  background: #f8fafc;
+}
+
+.loginBtn {
+  background: #1e293b;
+  color: white;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.loginBtn:hover { background: #334155; }
+.loginBtn:disabled { background: #94a3b8; }
