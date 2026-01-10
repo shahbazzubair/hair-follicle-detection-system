@@ -71,16 +71,6 @@
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
 }
 
-.btnOutline {
-  background: white;
-  border: 1px solid #e2e8f0;
-  color: #0f172a;
-  padding: 14px 28px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
 /* IMAGE SECTION WITH SCANNING */
 .imageWrapper {
   flex: 1; /* Takes up right side */

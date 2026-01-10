@@ -60,7 +60,7 @@ const PatientDashboard = () => {
     <div className={styles.dashboardWrapper}>
       <header className={styles.dashboardHeader}>
         <div className={styles.headerLeft}>
-          <h1 className={styles.logoText}>HairCare<span>AI</span></h1>
+          <h1 className={styles.logoText}>HFD<span>AI</span></h1>
         </div>
         <div className={styles.headerRight}>
           <div className={styles.userProfile}>

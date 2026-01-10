@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom'; // Added this import
 import styles from './Hero.module.css';
-import baldHeadImage from '../../assets/bald_head.png'; // Ensure image path is correct
+import baldHeadImage from '../../assets/bald_head.png'; 
 
 const Hero = () => {
   return (
@@ -18,8 +19,10 @@ const Hero = () => {
             accessible to everyone.
           </p>
           <div className={styles.btnGroup}>
-            <button className={styles.btnPrimary}>Start Free Scan</button>
-            <button className={styles.btnOutline}>View Methodology</button>
+            {/* Updated button to Link component */}
+            <Link to="/methodology" className={styles.btnPrimary}>
+              View Methodology
+            </Link>
           </div>
         </div>
         
