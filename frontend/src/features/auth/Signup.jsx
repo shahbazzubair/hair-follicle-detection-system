@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2'; 
@@ -6,7 +6,7 @@ import styles from './Signup.module.css';
 
 const Signup = () => {
   const [role, setRole] = useState('patient');
-  const [loading, setLoading] = useState(false); // Added loading state for better UX
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
@@ -18,6 +18,17 @@ const Signup = () => {
     specialization: '',
     degree: null
   });
+
+  // NEW: Real-time validation checks
+  const passwordChecks = useMemo(() => ({
+    length: formData.password.length >= 8,
+    upper: /[A-Z]/.test(formData.password),
+    lower: /[a-z]/.test(formData.password),
+    special: /[!@#$%^&*(),.?":{}|<>]/.test(formData.password),
+    number: /\d/.test(formData.password)
+  }), [formData.password]);
+
+  const isPasswordSecure = Object.values(passwordChecks).every(Boolean);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,7 +42,17 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Password validation
+    // Final security check before submission
+    if (!isPasswordSecure) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Weak Password',
+        text: 'Please meet all security requirements shown in the checklist.',
+        confirmButtonColor: '#2563eb'
+      });
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       Swal.fire({
         icon: 'warning',
@@ -42,19 +63,17 @@ const Signup = () => {
       return;
     }
 
-    setLoading(true); // Start loading
+    setLoading(true);
 
     try {
       let response;
-      
       if (role === 'patient') {
-        const patientData = {
+        response = await axios.post('http://localhost:8000/api/auth/signup/patient', {
           fullName: formData.fullName,
           email: formData.email,
           phone: formData.phone,
           password: formData.password
-        };
-        response = await axios.post('http://localhost:8000/api/auth/signup/patient', patientData);
+        });
       } else {
         const doctorData = new FormData();
         doctorData.append("fullName", formData.fullName);
@@ -62,9 +81,7 @@ const Signup = () => {
         doctorData.append("phone", formData.phone);
         doctorData.append("password", formData.password);
         doctorData.append("specialization", formData.specialization);
-        if (formData.degree) {
-          doctorData.append("degree", formData.degree);
-        }
+        if (formData.degree) doctorData.append("degree", formData.degree);
 
         response = await axios.post('http://localhost:8000/api/auth/signup/doctor', doctorData, {
           headers: { "Content-Type": "multipart/form-data" }
@@ -72,30 +89,15 @@ const Signup = () => {
       }
 
       if (response.data.status === "success") {
-        if (role === 'doctor') {
-          // UC-9: Inform doctor about the 24h verification wait time
-          await Swal.fire({
-            icon: 'success',
-            title: 'Registration Received!',
-            text: 'Doctor profile created. Please wait up to 24 hours for Admin to verify your degree. You can only login after verification.',
-            confirmButtonColor: '#2563eb',
-            allowOutsideClick: false
-          });
-        } else {
-          await Swal.fire({
-            icon: 'success',
-            title: 'Registration Successful!',
-            text: 'Welcome to HairCare AI. You can now log in.',
-            confirmButtonColor: '#2563eb',
-            timer: 2000,
-            showConfirmButton: false
-          });
-        }
-        
+        await Swal.fire({
+          icon: 'success',
+          title: 'Registration Successful!',
+          text: role === 'doctor' ? 'Account pending admin verification.' : 'Welcome! You can now log in.',
+          confirmButtonColor: '#2563eb'
+        });
         navigate('/login');
       }
     } catch (error) {
-      console.error("Signup Error:", error.response?.data?.detail || error.message);
       Swal.fire({
         icon: 'error',
         title: 'Registration Failed',
@@ -103,7 +105,7 @@ const Signup = () => {
         confirmButtonColor: '#ef4444'
       });
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
@@ -111,25 +113,13 @@ const Signup = () => {
     <div className={styles.authContainer}>
       <div className={styles.authCard}>
         <div className={styles.roleToggle}>
-          <button 
-            type="button"
-            className={role === 'patient' ? styles.activeTab : styles.tab} 
-            onClick={() => setRole('patient')}
-          >
-            Patient
-          </button>
-          <button 
-            type="button"
-            className={role === 'doctor' ? styles.activeTab : styles.tab} 
-            onClick={() => setRole('doctor')}
-          >
-            Doctor
-          </button>
+          <button type="button" className={role === 'patient' ? styles.activeTab : styles.tab} onClick={() => setRole('patient')}>Patient</button>
+          <button type="button" className={role === 'doctor' ? styles.activeTab : styles.tab} onClick={() => setRole('doctor')}>Doctor</button>
         </div>
 
         <div className={styles.headerArea}>
           <h2>{role === 'patient' ? 'Create Patient Account' : 'Join as a Doctor'}</h2>
-          <p>Join our AI-powered hair follicle analysis platform.</p>
+          <p>Complete the form below to get started.</p>
         </div>
         
         <form className={styles.form} onSubmit={handleSubmit}>
@@ -165,6 +155,25 @@ const Signup = () => {
             <div className={styles.inputGroup}>
               <label>Password</label>
               <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="••••••••" required />
+              
+              {/* LIVE PASSWORD CHECKLIST */}
+              <div className={styles.passwordRequirements}>
+                <div className={passwordChecks.length ? styles.valid : styles.invalid}>
+                   {passwordChecks.length ? '✓' : '○'} 8+ Characters
+                </div>
+                <div className={passwordChecks.upper ? styles.valid : styles.invalid}>
+                   {passwordChecks.upper ? '✓' : '○'} One Uppercase Letter
+                </div>
+                <div className={passwordChecks.lower ? styles.valid : styles.invalid}>
+                   {passwordChecks.lower ? '✓' : '○'} One Lowercase Letter
+                </div>
+                <div className={passwordChecks.number ? styles.valid : styles.invalid}>
+                   {passwordChecks.number ? '✓' : '○'} One Number
+                </div>
+                <div className={passwordChecks.special ? styles.valid : styles.invalid}>
+                   {passwordChecks.special ? '✓' : '○'} One Special Character
+                </div>
+              </div>
             </div>
 
             <div className={styles.inputGroup}>
@@ -173,8 +182,8 @@ const Signup = () => {
             </div>
           </div>
 
-          <button type="submit" className={styles.submitBtn} disabled={loading}>
-            {loading ? 'Processing...' : `Sign Up as ${role.charAt(0).toUpperCase() + role.slice(1)}`}
+          <button type="submit" className={styles.submitBtn} disabled={loading || !isPasswordSecure}>
+            {loading ? 'Processing...' : 'Sign Up'}
           </button>
         </form>
 

@@ -99,6 +99,38 @@
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
+/* --- NEW: PASSWORD STRENGTH CHECKLIST STYLES --- */
+.passwordRequirements {
+  margin-top: 10px;
+  padding: 15px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.requirement {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+  transition: color 0.3s ease;
+}
+
+.requirement:last-child {
+  margin-bottom: 0;
+}
+
+.valid {
+  color: #10b981; /* Green color for met criteria */
+  font-weight: 600;
+}
+
+.invalid {
+  color: #94a3b8; /* Gray color for unmet criteria */
+}
+
+/* --- BUTTON STYLES --- */
 .submitBtn {
   margin-top: 15px;
   padding: 16px;
@@ -113,9 +145,15 @@
   box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
 }
 
-.submitBtn:hover {
+.submitBtn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.4);
+}
+
+.submitBtn:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .switchAuth {
