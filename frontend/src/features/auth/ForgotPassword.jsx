@@ -14,20 +14,41 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      // Send request to your FastAPI backend
+      // Calling backend
       const response = await axios.post('http://localhost:8000/api/auth/forgot-password', { email });
       
       if (response.data.status === 'success') {
         Swal.fire({
           title: "Email Sent!",
-          text: "If this email is registered, you will receive a reset link shortly.",
+          text: "Please check your inbox for the reset link.",
           icon: "success",
           confirmButtonColor: "#2563eb"
         });
         setEmail('');
       }
     } catch (err) {
-      Swal.fire("Error", "Could not connect to the server. Please try again later.", "error");
+      // Specifically catch the "Not Found" error from backend
+      if (err.response && err.response.status === 404) {
+        Swal.fire({
+          title: "Not Registered",
+          text: err.response.data.detail,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: 'Go to Signup',
+          confirmButtonColor: "#2563eb",
+          cancelButtonText: 'Try Again'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigate('/signup');
+          }
+        });
+      } else {
+        Swal.fire({
+            title: "Error",
+            text: "Could not connect to the server. Please try again later.",
+            icon: "error"
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -38,7 +59,7 @@ const ForgotPassword = () => {
       <div className={styles.card}>
         <button onClick={() => navigate('/login')} className={styles.backBtn}>← Back to Login</button>
         <h2>Forgot Password?</h2>
-        <p>No worries! Enter your email below and we will send you a link to reset your password.</p>
+        <p>Enter your email below. We will check our system and send you a link.</p>
         
         <form onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>
@@ -52,7 +73,7 @@ const ForgotPassword = () => {
             />
           </div>
           <button type="submit" className={styles.submitBtn} disabled={loading}>
-            {loading ? "Sending Link..." : "Send Reset Link"}
+            {loading ? "Checking System..." : "Send Reset Link"}
           </button>
         </form>
       </div>
