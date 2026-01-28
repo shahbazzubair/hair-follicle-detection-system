@@ -16,14 +16,18 @@ const AdminDashboard = () => {
   });
 
   useEffect(() => {
+    const role = localStorage.getItem('userRole');
+    if (role !== 'admin') {
+      navigate('/admin', { replace: true });
+      return;
+    }
     fetchUsers();
-  }, []);
+  }, [navigate]);
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const response = await axios.get('http://localhost:8000/api/admin/users');
-      // Backend now sends the phone field explicitly
       setUsers(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Fetch error:", error);
@@ -58,6 +62,12 @@ const AdminDashboard = () => {
     }
   };
 
+  // UPDATED LOGOUT: Instant redirect with no popup
+  const handleLogout = () => {
+    localStorage.clear(); // Wipe all session data
+    navigate('/', { replace: true }); // Immediate redirect to Landing Page
+  };
+
   const stats = {
     total: users.length,
     patients: users.filter(u => u.role === 'patient').length,
@@ -90,7 +100,7 @@ const AdminDashboard = () => {
                     <tr key={user.id}>
                       <td>{user.fullName || "N/A"}</td>
                       <td>{user.email || "N/A"}</td>
-                      <td>{user.phone || "N/A"}</td> {/* Phone now displays correctly */}
+                      <td>{user.phone || "N/A"}</td>
                       <td>
                         {user.role === 'doctor' ? (
                           <div>
@@ -147,8 +157,8 @@ const AdminDashboard = () => {
           </div>
           <div className={styles.chartCard}>
             <h3>Server Status</h3>
-            <p>🟢 Database: Connected</p>
-            <p>🟢 API: Healthy</p>
+            <p>✅ Database: Connected</p>
+            <p>✅ API: Healthy</p>
           </div>
         </div>
       );
@@ -177,7 +187,7 @@ const AdminDashboard = () => {
           <button className={view === 'analytics' ? styles.navItemActive : styles.navItem} onClick={() => setView('analytics')}>📊 Analytics</button>
           <button className={view === 'settings' ? styles.navItemActive : styles.navItem} onClick={() => setView('settings')}>⚙️ Settings</button>
         </nav>
-        <button onClick={() => { localStorage.clear(); navigate('/admin'); }} className={styles.logoutBtn}>Logout</button>
+        <button onClick={handleLogout} className={styles.logoutBtn}>Logout</button>
       </aside>
 
       <main className={styles.mainContent}>
@@ -189,7 +199,7 @@ const AdminDashboard = () => {
           <div className={styles.statsGrid}>
             <div className={styles.statCard}><span>Patients</span><h3>{stats.patients}</h3></div>
             <div className={styles.statCard}><span>Pending</span><h3>{stats.pending}</h3></div>
-            <div className={styles.statCard}><span>Verified</span><h3>{stats.verified}</h3></div>
+            <div className={styles.statCard}><span>Verified Doctors</span><h3>{stats.verified}</h3></div>
           </div>
         )}
         {renderContent()}
