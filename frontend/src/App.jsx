@@ -8,6 +8,7 @@ import Footer from './components/Footer/Footer';
 // --- Landing Page ---
 import Hero from './pages/landing_page/Hero';
 import Testimonials from './pages/landing_page/Testimonials';
+import Methodology from './pages/landing_page/Methodology';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Contact from './pages/Contact';
@@ -21,6 +22,9 @@ import ResetPassword from './pages/auth/ResetPassword';
 // --- Admin Portal ---
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
+
+import PatientDashboard from './pages/patient/PatientDashboard';
+import DoctorDashboard from './pages/doctor/DoctorDashboard';
 
 export default function App() {
   return (
@@ -42,6 +46,7 @@ export default function App() {
                   <>
                     <Hero />
                     <Testimonials />
+                    <Methodology/>
                   </>
                 } />
                 
@@ -58,18 +63,8 @@ export default function App() {
                 
                 {/* --- TEMPORARY DASHBOARD PLACEHOLDERS --- */}
                 {/* We will replace these with the real files next! */}
-                <Route path="/patient-dashboard" element={
-                  <div style={{ padding: '100px 20px', textAlign: 'center', color: '#0f172a' }}>
-                    <h2>Welcome to the Patient Dashboard!</h2>
-                    <p style={{ color: '#64748b' }}>We will build this UI next.</p>
-                  </div>
-                } />
-                <Route path="/doctor-dashboard" element={
-                  <div style={{ padding: '100px 20px', textAlign: 'center', color: '#0f172a' }}>
-                    <h2>Welcome to the Doctor Dashboard!</h2>
-                    <p style={{ color: '#64748b' }}>We will build this UI next.</p>
-                  </div>
-                } />
+                <Route path="/patient-dashboard" element={<PatientDashboard />} />
+                <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
 
               </Routes>
             </main>

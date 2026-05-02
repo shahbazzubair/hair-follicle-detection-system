@@ -1,0 +1,127 @@
+.methodologySection {
+  background: #f8fafc;
+  padding: 80px 20px;
+  font-family: 'Inter', sans-serif;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.mainTitle {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 15px;
+}
+
+.subTitle {
+  font-size: 1.1rem;
+  color: #64748b;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* --- Role Badges --- */
+.roleBadgePatient, .roleBadgeDoctor {
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  margin-top: 50px;
+  display: inline-block;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.roleBadgePatient {
+  background: #eff6ff;
+  color: #2563eb;
+  border-left: 4px solid #2563eb;
+}
+
+.roleBadgeDoctor {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-left: 4px solid #16a34a;
+}
+
+/* --- Workflow Grid --- */
+.workflowGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.stepCard {
+  display: flex;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  align-items: center;
+  gap: 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stepCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.stepInfo {
+  flex: 1.5;
+}
+
+.stepInfo h3 {
+  font-size: 1.3rem;
+  color: #1e293b;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.stepInfo p {
+  color: #475569;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.stepVisual {
+  flex: 1;
+  background: #f1f5f9;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px; /* Placeholder height if images are missing */
+}
+
+.stepVisual img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stepCard {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+    padding: 20px;
+  }
+  .stepVisual {
+    width: 100%;
+  }
+}

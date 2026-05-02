@@ -4,6 +4,14 @@ from app.core.database import user_collection
 import os
 import shutil
 import re
+import secrets
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
+
+# Load the .env file variables
+load_dotenv()
 
 router = APIRouter()
 
@@ -76,9 +84,9 @@ async def signup_doctor(
         "phone": phone, 
         "password": password,
         "specialization": specialization, 
-        "degree_path": f"/{file_path}", # For the admin to view later
+        "degree_path": f"/{file_path}", 
         "role": "doctor", 
-        "status": "Pending" # Admin must approve
+        "status": "Pending" 
     }
     await user_collection.insert_one(doctor_dict)
     return {"status": "success", "message": "Doctor registered. Awaiting Admin approval."}
@@ -100,7 +108,7 @@ async def login_user(credentials: LoginSchema):
         "fullName": user.get("fullName")
     }
 
-# --- 4. MOCK FORGOT PASSWORD ---
+# --- 4. REAL FORGOT PASSWORD ---
 @router.post("/forgot-password")
 async def forgot_password(request: dict = Body(...)):
     email = request.get("email")
@@ -108,14 +116,63 @@ async def forgot_password(request: dict = Body(...)):
     if not user:
         raise HTTPException(status_code=404, detail="Email not registered.")
     
-    # NOTE: Add actual email sending logic here later
-    return {"status": "success", "message": "Mock reset link generated."}
+    # Fetch credentials matching your exact .env variable names
+    sender_email = os.getenv("MAIL_USERNAME")
+    sender_password = os.getenv("MAIL_PASSWORD")
+    smtp_server = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+    smtp_port = int(os.getenv("MAIL_PORT", 587))
 
-# --- 5. MOCK RESET PASSWORD ---
+    # Safety check so the server doesn't crash if .env is missing
+    if not sender_email or not sender_password:
+        raise HTTPException(status_code=500, detail="Server email configuration is missing or invalid.")
+    
+    # 1. Generate token
+    reset_token = secrets.token_urlsafe(32)
+    
+    # 2. Save token
+    await user_collection.update_one(
+        {"email": email}, 
+        {"$set": {"reset_token": reset_token}}
+    )
+    
+    # 3. Prepare Email
+    reset_link = f"http://localhost:5173/reset-password/{reset_token}"
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = email
+    msg['Subject'] = "HFD AI Portal - Password Reset"
+    body = f"Hello,\n\nYou requested a password reset. Click the link below to securely set a new password:\n\n{reset_link}\n\nIf you did not request this, please ignore this email."
+    msg.attach(MIMEText(body, 'plain'))
+    
+    # 4. Send Email
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+        server.quit()
+    except Exception as e:
+        print(f"Email Error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
+        
+    return {"status": "success", "message": "Reset link sent successfully."}
+
+# --- 5. REAL RESET PASSWORD ---
 @router.post("/reset-password/{token}")
 async def reset_password(token: str, data: dict = Body(...)):
     new_password = data.get("password")
     validate_password_strength(new_password)
     
-    # NOTE: Add actual token decoding and DB updating logic here later
-    return {"status": "success", "message": "Mock password updated."}
+    user = await user_collection.find_one({"reset_token": token})
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset link.")
+    
+    await user_collection.update_one(
+        {"_id": user["_id"]},
+        {
+            "$set": {"password": new_password},
+            "$unset": {"reset_token": ""} 
+        }
+    )
+    
+    return {"status": "success", "message": "Password updated securely."}
