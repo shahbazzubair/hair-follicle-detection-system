@@ -23,6 +23,7 @@ import ResetPassword from './pages/auth/ResetPassword';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 
+// --- Dashboards ---
 import PatientDashboard from './pages/patient/PatientDashboard';
 import DoctorDashboard from './pages/doctor/DoctorDashboard';
 
@@ -31,9 +32,11 @@ export default function App() {
     <Router>
       <Routes>
         
-        {/* === ADMIN PORTAL (No Navbar/Footer) === */}
+        {/* === PORTALS & DASHBOARDS (No Global Navbar/Footer) === */}
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/patient-dashboard" element={<PatientDashboard />} />
+        <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
 
         {/* === MAIN WEBSITE & AUTH (With Navbar/Footer) === */}
         <Route path="/*" element={
@@ -41,14 +44,11 @@ export default function App() {
             <Navbar />
             <main style={{ flex: 1 }}>
               <Routes>
-                {/* Landing Page */}
-                <Route path="/" element={
-                  <>
-                    <Hero />
-                    <Testimonials />
-                    <Methodology/>
-                  </>
-                } />
+                {/* Landing Page (Clean & Short) */}
+                <Route path="/" element={<><Hero /><Testimonials /></>} />
+                
+                {/* Dedicated Standalone Methodology Page */}
+                <Route path="/methodology" element={<Methodology />} />
                 
                 {/* Authentication Pages */}
                 <Route path="/login" element={<Login />} />
@@ -60,12 +60,6 @@ export default function App() {
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/contact" element={<Contact />} />
-                
-                {/* --- TEMPORARY DASHBOARD PLACEHOLDERS --- */}
-                {/* We will replace these with the real files next! */}
-                <Route path="/patient-dashboard" element={<PatientDashboard />} />
-                <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
-
               </Routes>
             </main>
             <Footer />

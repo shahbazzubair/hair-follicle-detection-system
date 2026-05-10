@@ -7,6 +7,8 @@ from app.core.database import db
 # Import your route files
 from app.api.auth import router as auth_router
 from app.api.admin import router as admin_router # <-- Added this
+from app.api.patient import router as patient_router
+from app.api.doctor import router as doctor_router # <-- ADD THIS
 
 app = FastAPI(title="HFD AI Backend")
 
@@ -25,6 +27,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # --- CONNECT THE ROUTES ---
 app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
 app.include_router(admin_router, prefix="/api/admin", tags=["Admin"]) # <-- Connected it here
+app.include_router(patient_router, prefix="/api/patient", tags=["Patient"])
+app.include_router(doctor_router, prefix="/api/doctor", tags=["Doctor"]) # <-- ADD THIS
 
 @app.on_event("startup")
 async def startup_db_client():

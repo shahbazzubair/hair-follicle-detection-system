@@ -31,7 +31,6 @@ export default function DoctorDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // We will build this backend route next!
       const res = await axios.get(`http://localhost:8000/api/doctor/data/${localStorage.getItem('userName')}`);
       setScans(res.data.scans || []);
       setReports(res.data.reports || []);
@@ -51,7 +50,7 @@ export default function DoctorDashboard() {
       autoTable(doc, {
         startY: 35,
         theme: 'grid',
-        headStyles: { fillColor: [15, 23, 42] }, // Matches Doctor theme
+        headStyles: { fillColor: [15, 23, 42] }, 
         head: [['Metric', 'Details']],
         body: [
           ['Patient Name', data.patientName],
@@ -84,9 +83,17 @@ export default function DoctorDashboard() {
       try {
         await axios.put(`http://localhost:8000/api/doctor/process-scan/${scan.id}`);
         Swal.fire("Success", "Analysis Complete & Report Generated", "success");
-        fetchData(); // Refresh queue
+        fetchData(); 
       } catch (err) { 
-        Swal.fire("Error", "Processing failed.", "error"); 
+        // 🚨 ERROR HANDLING FOR MISSING MODEL
+        const status = err.response?.status;
+        const detail = err.response?.data?.detail || "Processing failed.";
+        
+        if (status === 503) {
+          Swal.fire("Model Offline", detail, "warning");
+        } else {
+          Swal.fire("Error", "Could not connect to analysis server.", "error"); 
+        }
       }
     }
   };
@@ -109,10 +116,18 @@ export default function DoctorDashboard() {
       setDirectPatientName('');
       setDirectFile(null);
       document.getElementById('directFileInput').value = null;
-      fetchData(); // Refresh to show new report
-      setActiveTab('queue'); // Switch back to see the report
+      fetchData(); 
+      setActiveTab('queue'); 
     } catch (err) {
-      Swal.fire("Analysis Failed", "Could not process the image.", "error");
+      // 🚨 ERROR HANDLING FOR MISSING MODEL
+      const status = err.response?.status;
+      const detail = err.response?.data?.detail || "Analysis Failed.";
+      
+      if (status === 503) {
+        Swal.fire("Model Offline", detail, "warning");
+      } else {
+        Swal.fire("Analysis Failed", "Could not process the image.", "error");
+      }
     } finally {
       setIsProcessing(false);
     }

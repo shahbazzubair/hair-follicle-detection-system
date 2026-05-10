@@ -1,9 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styles from './Hero.module.css';
 import baldHeadImage from '../../assets/bald_head.png'; 
 
 export default function Hero() {
+  const navigate = useNavigate();
+
   return (
     <section className={styles.hero}>
       <div className={styles.container}>
@@ -19,9 +21,30 @@ export default function Hero() {
             density mapping, and growth tracking. Built for professionals, 
             accessible to everyone.
           </p>
-          <Link to="/methodology" className={styles.btnPrimary}>
-            View Methodology
-          </Link>
+          
+          <div style={{ display: 'flex', gap: '15px', marginTop: '20px', flexWrap: 'wrap' }}>
+            {/* Primary Action */}
+            <button 
+              onClick={() => navigate('/signup')} 
+              className={styles.btnPrimary}
+            >
+              Get Started
+            </button>
+            
+            {/* Secondary Action routing to your standalone page */}
+            <button 
+              onClick={() => navigate('/methodology')} 
+              className={styles.btnPrimary} 
+              style={{ 
+                background: 'transparent', 
+                color: '#2563eb', 
+                border: '2px solid #2563eb',
+                boxShadow: 'none'
+              }}
+            >
+              View Methodology
+            </button>
+          </div>
         </div>
         
         <div className={styles.imageWrapper}>

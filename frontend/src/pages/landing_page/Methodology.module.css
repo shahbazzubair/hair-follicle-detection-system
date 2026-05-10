@@ -1,6 +1,12 @@
-.methodologySection {
+.pageWrapper {
   background: #f8fafc;
-  padding: 80px 20px;
+  min-height: 100vh;
+}
+
+/* We removed .topNav entirely! */
+
+.methodologySection {
+  padding: 60px 20px 80px 20px;
   font-family: 'Inter', sans-serif;
 }
 
@@ -27,6 +33,36 @@
   max-width: 1000px;
   margin: 0 auto;
 }
+
+/* --- Bottom Action Area --- */
+.bottomAction {
+  display: flex;
+  justify-content: center;
+  margin-top: 70px;
+  padding-top: 40px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.backBtn {
+  background: white;
+  color: #2563eb;
+  border: 2px solid #dbeafe;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.1);
+}
+
+/* ... Keep all your other CSS styles below this point ... */
 
 /* --- Role Badges --- */
 .roleBadgePatient, .roleBadgeDoctor {
