@@ -1,5 +1,8 @@
+/* src/features/landing_page/Hero.module.css */
+
 .hero {
-  padding: 80px 0;
+   margin-top: 80px;
+  padding: 60px 0 80px;
   background: radial-gradient(circle at top right, #eff6ff, #ffffff);
   min-height: 80vh;
   display: flex;
@@ -8,10 +11,10 @@
 }
 
 .container {
-  max-width: 1500px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
-  display: flex; 
+  display: flex; /* Use flex for side-by-side layout */
   justify-content: space-between;
   align-items: center;
   gap: 40px;
@@ -19,22 +22,23 @@
 }
 
 .content {
-  flex: 1; 
+  flex: 1; /* Takes up left side */
   text-align: left;
 }
 
 .badge {
+  display: inline-flex;
+  align-items: center;
   background: #dbeafe;
   color: #2563eb;
-  padding: 8px 16px;
-  border-radius: 50px;
-  font-size: 0.85rem;
-  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 800;
   text-transform: uppercase;
-  display: inline-block;
-  margin-bottom: 20px;
+  letter-spacing: 0.4px;
+  margin-bottom: 28px;
 }
-
 .title {
   font-size: clamp(2.5rem, 5vw, 3.5rem);
   line-height: 1.2;
@@ -53,11 +57,15 @@
   line-height: 1.6;
 }
 
+.btnGroup {
+  display: flex;
+  gap: 16px;
+}
+
 .btnPrimary {
-  display: inline-block;
   background: #2563eb;
   color: white;
-  text-decoration: none;
+  border: none;
   padding: 14px 28px;
   border-radius: 8px;
   font-weight: 600;
@@ -65,6 +73,7 @@
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
 }
 
+/* IMAGE SECTION WITH SCANNING */
 .imageWrapper {
   flex: 1; 
   position: relative;
@@ -109,11 +118,13 @@
   100% { top: 100%; opacity: 0; }
 }
 
+/* Mobile Fix */
 @media (max-width: 968px) {
   .container {
     flex-direction: column;
     text-align: center;
   }
   .content { text-align: center; }
+  .btnGroup { justify-content: center; }
   .imageWrapper { width: 100%; height: 300px; }
 }

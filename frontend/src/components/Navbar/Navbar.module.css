@@ -1,18 +1,23 @@
+/* src/components/Navbar/Navbar.module.css */
+
 .navbar {
   width: 100%;
   height: 80px;
-  background-color: #a0c9f1;
-  border-bottom: 1px solid #e2e8f0;
+  background: #a0c9f1;
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #dbeafe;
   display: flex;
   align-items: center;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
   z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
 .container {
   width: 100%;
-  max-width: 1500px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 40px;
   display: flex;
@@ -20,39 +25,176 @@
   align-items: center;
 }
 
+/* LOGO */
+
 .logo {
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   font-weight: 800;
-  color: #0f172a;
+  color: #111827;
   text-decoration: none;
+  letter-spacing: -0.5px;
 }
 
 .logo span {
   color: #2563eb;
 }
 
+/* RIGHT SECTION */
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+/* NAV LINKS */
+
+.navLinks {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+  margin: 0;
+  padding: 0;
+}
+
+.navLinks a {
+  text-decoration: none;
+  color: #4b5563;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: 0.3s;
+}
+
+.navLinks a:hover {
+  color: #2563eb;
+}
+
+/* AUTH BUTTONS */
+
 .authButtons {
   display: flex;
-  gap: 20px;
   align-items: center;
+  gap: 15px;
 }
 
-.loginBtn {
+/* ACTIVE BUTTON */
+
+.activeBtn {
   text-decoration: none;
-  color: #475569;
+  background: #2563eb;
+  color: white !important;
+  padding: 11px 24px;
+  border-radius: 10px;
   font-weight: 600;
+  transition: 0.3s;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
-.signupBtn {
+.activeBtn:hover {
+  transform: translateY(-2px);
+}
+
+/* INACTIVE BUTTON */
+
+.inactiveBtn {
   text-decoration: none;
-  background-color: #2563eb;
-  color: #ffffff;
-  padding: 10px 24px;
-  border-radius: 8px;
+  color: #111827;
   font-weight: 600;
-  transition: opacity 0.2s;
+  padding: 11px 24px;
+  border-radius: 10px;
+  transition: 0.3s;
 }
 
-.signupBtn:hover {
-  opacity: 0.9;
+.inactiveBtn:hover {
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+}
+
+/* HAMBURGER */
+
+.menuIcon {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+  z-index: 1001;
+}
+
+.bar {
+  width: 25px;
+  height: 3px;
+  background-color: #111827;
+  transition: 0.3s;
+  border-radius: 2px;
+}
+
+/* MOBILE */
+
+@media (max-width: 768px) {
+
+  .container {
+    padding: 0 20px;
+  }
+
+  .menuIcon {
+    display: flex;
+  }
+
+  .rightSection {
+    position: fixed;
+    top: 80px;
+    left: -100%;
+    width: 100%;
+    height: calc(100vh - 80px);
+    background: #f8fafc;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 40px 0;
+    transition: 0.4s ease-in-out;
+    gap: 30px;
+    z-index: 999;
+  }
+
+  .showMenu {
+    left: 0;
+  }
+
+  .navLinks {
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    display: flex;
+  }
+
+  .navLinks a {
+    font-size: 1.1rem;
+  }
+
+  .authButtons {
+    flex-direction: column;
+    width: 85%;
+    gap: 15px;
+  }
+
+  .activeBtn,
+  .inactiveBtn {
+    width: 100%;
+    text-align: center;
+    padding: 15px;
+  }
+
+  /* HAMBURGER ANIMATION */
+
+  .bar1 {
+    transform: rotate(-45deg) translate(-5px, 6px);
+  }
+
+  .bar2 {
+    opacity: 0;
+  }
+
+  .bar3 {
+    transform: rotate(45deg) translate(-5px, -6px);
+  }
 }

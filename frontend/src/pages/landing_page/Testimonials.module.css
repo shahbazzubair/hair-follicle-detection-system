@@ -1,68 +1,127 @@
+/* =========================
+   TESTIMONIAL SECTION
+========================= */
+
 .testimonialSection {
-  padding: 80px 0;
-  background-color: #f8fafc; /* A very soft, clean clinical gray/blue */
+  padding: 90px 0;
+  /* padding-top: 140px; */
+  background: linear-gradient(135deg, #b4c8f5, #3d5eb9);
+  overflow: hidden;
 }
 
 .container {
-  max-width: 1500px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 0 20px;
   text-align: center;
 }
 
 .title {
-  font-size: 2.5rem;
-  color: #0f172a;
-  margin-bottom: 10px;
+  font-size: 3rem;
+  color: black;
+  margin-bottom: 15px;
+  font-weight: 800;
 }
 
 .title span {
-  color: #2563eb;
+  color: #0a6891;
 }
 
 .subtitle {
-  color: #64748b;
-  margin-bottom: 50px;
+  color:black;
+  margin-bottom: 60px;
   font-size: 1.1rem;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
+/* =========================
+   SLIDER
+========================= */
+
+.slider {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  justify-content: center;
 }
 
-.card {
-  background: white;
-  padding: 40px;
-  border-radius: 20px;
-  border: 1px solid #e2e8f0;
-  text-align: left;
-  transition: transform 0.3s ease;
+.sliderTrack {
   display: flex;
-  flex-direction: column;
+  width: 100%;
+  animation: singleSlide 6s infinite;
+}
+
+.slide {
+  min-width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.card {
+  width: 100%;
+  max-width: 700px;
+  min-height: 320px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  padding: 40px;
+  border-radius: 24px;
+  text-align: left;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 35px rgba(0,0,0,0.25);
+  transition: 0.4s ease;
+  position: relative;
+  overflow: hidden;
+   transition: all 0.4s ease;
+}
+
+/* TOP BLUE ANIMATION LINE */
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #38bdf8,
+    transparent
+  );
+  animation: lineMove 6s linear infinite;
 }
 
 .card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
 }
 
 .quoteIcon {
-  font-size: 4rem;
-  color: #dbeafe;
+  font-size: 5rem;
+  color: #60a5fa;
   line-height: 0;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   font-family: serif;
+  opacity: 0.3;
 }
 
 .feedback {
   color: #334155;
   font-style: italic;
-  margin-bottom: 30px;
-  line-height: 1.6;
-  flex-grow: 1;
+  margin-bottom: 35px;
+  line-height: 1.9;
+  font-size: 1rem;
 }
+
+/* =========================
+   PROFILE
+========================= */
 
 .profile {
   display: flex;
@@ -71,25 +130,94 @@
 }
 
 .avatar {
-  font-size: 2rem;
-  background: #f1f5f9;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100px;
+  height: 100px;
+
+  object-fit: cover;
+
   border-radius: 50%;
+
+  border: 5px solid #38bdf8;
+
+  box-shadow: 0 8px 22px rgba(37,99,235,0.35);
+
+  overflow: hidden;
+
+  flex-shrink: 0;
 }
 
 .name {
   color: #0f172a;
-  font-weight: 700;
+  font-weight: 800;
   margin: 0;
+  font-size: 1.1rem;
 }
 
 .role {
   color: #2563eb;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 5px 0 0;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+@keyframes singleSlide {
+
+  0% {
+    transform: translateX(0%);
+  }
+
+  30% {
+    transform: translateX(0%);
+  }
+
+  33% {
+    transform: translateX(-100%);
+  }
+
+  63% {
+    transform: translateX(-100%);
+  }
+
+  66% {
+    transform: translateX(-200%);
+  }
+
+  96% {
+    transform: translateX(-200%);
+  }
+
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes lineMove {
+
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+
+  .title {
+    font-size: 2.2rem;
+  }
+
+  .card {
+    padding: 25px;
+    min-height: auto;
+  }
 }
