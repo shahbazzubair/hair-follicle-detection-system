@@ -72,13 +72,15 @@ async def get_doctor_data(doctor_name: str):
     
     for scan in all_scans:
         scan_data = {
-            "id": str(scan["_id"]),
-            "patientName": scan.get("patientName"),
-            "imagePath": scan.get("imagePath"),
-            "status": scan.get("status"),
-            "date": scan.get("date"),
-            "baldnessStage": scan.get("baldnessStage", "")
-        }
+                     "id": str(scan["_id"]),
+                     "patientName": scan.get("patientName"),
+                     "imagePath": scan.get("imagePath"),
+                     "status": scan.get("status"),
+                     "date": scan.get("date"),
+                     "baldnessStage": scan.get("baldnessStage", ""),
+                     "doctorId": scan.get("doctorId"),
+                     "isDirectAnalysis": scan.get("isDirectAnalysis", False)
+                  }
         if scan.get("status") == "Pending":
             pending_scans.append(scan_data)
         elif scan.get("status") == "Processed":
@@ -127,13 +129,14 @@ async def direct_analysis(
     ai_result = analyze_image_with_ai(local_path)
         
     scan_doc = {
-        "patientName": patientName,
-        "doctorId": "Direct",
-        "doctorName": doctorName,
-        "imagePath": f"/{upload_dir}/{unique_filename}",
-        "status": "Processed",
-        "baldnessStage": ai_result,
-        "date": datetime.utcnow().isoformat()
-    }
+                "patientName": patientName,
+                "doctorId": "Direct",
+                "doctorName": doctorName,
+                 "imagePath": f"/{upload_dir}/{unique_filename}",
+                "status": "Processed",
+                "baldnessStage": ai_result,
+                "isDirectAnalysis": True,
+                 "date": datetime.utcnow().isoformat()
+      }
     await scan_collection.insert_one(scan_doc)
     return {"status": "success"}

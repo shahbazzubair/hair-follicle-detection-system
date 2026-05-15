@@ -3,8 +3,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f0f7ff; 
-  padding: 40px 20px;
+  background-color: #f0f7ff;
+  
+  padding: 120px 20px 40px; /* top right/left bottom */
+  
   font-family: 'Inter', sans-serif;
 }
 

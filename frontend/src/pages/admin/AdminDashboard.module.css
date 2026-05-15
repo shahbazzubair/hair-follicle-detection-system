@@ -55,18 +55,12 @@
   border-left: 4px solid #2563eb; /* Nice visual indicator */
 }
 
-.logoutBtn {
-  background: #fee2e2;
-  color: #ef4444;
-  border: none;
-  padding: 0.85rem;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.2s;
-}
+.logoutBtn {  position: fixed;bottom: 30px;left: 40px; width: 200px; background: rgba(239, 68, 68, 0.1);
+              color: #ef4444; border: 1.5px solid rgba(239, 68, 68, 0.2); padding: 1rem;border-radius: 14px;
+             font-weight: 700;cursor: pointer; transition: all 0.3s ease; z-index: 1000;
+            }
 
-.logoutBtn:hover { background: #fecaca; }
+.logoutBtn:hover { background: rgba(239, 68, 68, 0.18);}
 
 /* --- MAIN CONTENT AREA --- */
 .mainContent {
