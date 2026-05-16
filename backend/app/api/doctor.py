@@ -222,7 +222,7 @@ async def get_profile(doctor_name: str):
 
     return {
         "_id": doctor["_id"],
-        "fullname": doctor.get("fullName", ""),
+        "fullName": doctor.get("fullName", ""),
         "speciality": doctor.get(
             "speciality",
             doctor.get("specialization", "")
@@ -332,7 +332,7 @@ async def get_all_doctors():
 
         formatted_doctors.append({
             "id": str(doctor["_id"]),
-            "fullname": doctor.get("fullName", ""),
+            "fullName": doctor.get("fullName", ""),
             "speciality": doctor.get(
                 "specialization",
                 ""
