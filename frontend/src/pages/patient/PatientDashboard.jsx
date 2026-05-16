@@ -1,26 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import Swal from 'sweetalert2';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import Swal from "sweetalert2";
 import { jsPDF } from "jspdf";
-import autoTable from 'jspdf-autotable'; 
-import styles from './PatientDashboard.module.css';
+import autoTable from "jspdf-autotable";
+import styles from "./PatientDashboard.module.css";
 
 export default function PatientDashboard() {
   const navigate = useNavigate();
 
-  const [userName] = useState(localStorage.getItem('userName'));
+  const [userName] = useState(localStorage.getItem("userName"));
+
   const [doctors, setDoctors] = useState([]);
+
   const [selectedDoctor, setSelectedDoctor] = useState("");
+
+  const [selectedDoctorName, setSelectedDoctorName] = useState("");
+
   const [loading, setLoading] = useState(false);
+
   const [dataLoading, setDataLoading] = useState(true);
 
   const [myScans, setMyScans] = useState([]);
+
   const [myReports, setMyReports] = useState([]);
 
   useEffect(() => {
     if (!userName) {
-      navigate('/login', { replace: true });
+      navigate("/login", { replace: true });
       return;
     }
 
@@ -31,79 +38,108 @@ export default function PatientDashboard() {
     setDataLoading(true);
 
     try {
-      // KEEPING YOUR ORIGINAL API ROUTES
-      const docRes = await axios.get('http://localhost:8000/api/patient/doctors');
+
+      // UPDATED API
+      const docRes = await axios.get(
+        "http://localhost:8000/api/doctor/all-doctors"
+      );
+
       setDoctors(docRes.data);
 
       const dataRes = await axios.get(
-        `http://localhost:8000/api/patient/data/${localStorage.getItem('userName')}`
+        `http://localhost:8000/api/patient/data/${userName}`
       );
 
       setMyScans(dataRes.data.scans || []);
+
       setMyReports(dataRes.data.reports || []);
+
     } catch (err) {
-      console.error("Failed to load user data");
+      console.error(err);
     } finally {
       setDataLoading(false);
     }
   };
 
   const downloadPDF = (report) => {
+
     try {
+
       const doc = new jsPDF();
 
       doc.setFont("helvetica", "bold");
-      doc.text("HAIR FOLLICLE ANALYSIS REPORT", 105, 20, {
-        align: "center"
-      });
+
+      doc.text(
+        "HAIR FOLLICLE ANALYSIS REPORT",
+        105,
+        20,
+        {
+          align: "center"
+        }
+      );
 
       autoTable(doc, {
         startY: 40,
-        head: [['Metric', 'Details']],
+
+        head: [["Metric", "Details"]],
+
         body: [
-          ['Patient Name', userName],
-          ['Doctor', `Dr. ${report.doctorName}`],
-          ['AI Result', report.baldnessStage],
-          ['Clinical Status', 'Processed'],
-          ['Date', new Date(report.date).toLocaleDateString()]
-        ],
+          ["Patient Name", userName],
+          ["Doctor", `Dr. ${report.doctorName}`],
+          ["AI Result", report.baldnessStage],
+          ["Clinical Status", "Processed"],
+          [
+            "Date",
+            new Date(report.date).toLocaleDateString()
+          ]
+        ]
       });
 
       doc.save(
-        `${userName}_Report_${report.baldnessStage.replace(' ', '_')}.pdf`
+        `${userName}_Report.pdf`
       );
 
     } catch (err) {
-      Swal.fire("Download Failed", "PDF generation failed.", "error");
+
+      Swal.fire(
+        "Error",
+        "PDF generation failed.",
+        "error"
+      );
     }
   };
 
-  // NEW FUNCTIONALITY FROM SECOND CODE
   const handleDownloadForScan = (scanId) => {
-    const report = myReports.find(r => r.scanId === scanId);
+
+    const report = myReports.find(
+      (r) => r.scanId === scanId
+    );
 
     if (report) {
       downloadPDF(report);
     } else {
       Swal.fire(
         "Pending",
-        "This scan is still waiting for doctor review.",
+        "Report not generated yet.",
         "info"
       );
     }
   };
 
   const handleUpload = async (e) => {
+
     const file = e.target.files[0];
 
     if (!file) return;
 
     if (!selectedDoctor) {
+
       Swal.fire(
-        "Selection Required",
-        "Please select a specialist.",
+        "Required",
+        "Please select a doctor first.",
         "warning"
       );
+
       return;
     }
 
@@ -111,15 +147,16 @@ export default function PatientDashboard() {
 
     const formData = new FormData();
 
-    // KEEPING YOUR ORIGINAL BACKEND FIELD NAMES
     formData.append("patientName", userName);
+
     formData.append("doctorId", selectedDoctor);
+
     formData.append("image", file);
 
     try {
-      // KEEPING YOUR ORIGINAL ROUTE
+
       await axios.post(
-        'http://localhost:8000/api/patient/upload-scan',
+        "http://localhost:8000/api/patient/upload-scan",
         formData,
         {
           headers: {
@@ -130,27 +167,33 @@ export default function PatientDashboard() {
 
       Swal.fire(
         "Success",
-        "Scan sent successfully.",
+        `Scan sent to Dr. ${selectedDoctorName}`,
         "success"
       );
 
       fetchPatientData();
 
     } catch (err) {
+
       Swal.fire(
-        "Upload Failed",
-        "Backend connection error.",
+        "Error",
+        "Upload failed.",
         "error"
       );
+
     } finally {
+
       setLoading(false);
+
       e.target.value = null;
     }
   };
 
   const handleLogout = () => {
+
     localStorage.clear();
-    navigate('/login', { replace: true });
+
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -168,15 +211,17 @@ export default function PatientDashboard() {
         <div className={styles.headerRight}>
 
           <div className={styles.userProfile}>
+
             <div className={styles.avatar}>
               {userName?.charAt(0).toUpperCase()}
             </div>
 
             <div className={styles.userMeta}>
               <span className={styles.actualName}>
-                {userName?.charAt(0).toUpperCase() + userName?.slice(1)}
+                {userName}
               </span>
             </div>
+
           </div>
 
           <button
@@ -187,116 +232,158 @@ export default function PatientDashboard() {
           </button>
 
         </div>
+
       </header>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN */}
       <main className={styles.mainContent}>
 
         <div className={styles.welcomeHero}>
+
           <h2>
-            Welcome, {userName?.charAt(0).toUpperCase() + userName?.slice(1)}
+            Welcome, {userName}
           </h2>
 
           <p>
-            Manage your follicle scans and clinical reports in one place.
+            Upload scalp scans and select your preferred doctor.
           </p>
+
         </div>
 
-        <div className={styles.gridContainer}>
+        {/* DOCTOR SECTION */}
+        <section className={styles.gallerySection}>
 
-          {/* SPECIALIST */}
-          <section className={styles.dashboardCard}>
-            <h3>👨‍⚕️ Specialist</h3>
+          <h2 className={styles.sectionTitle}>
+            👨‍⚕️ Available Specialists
+          </h2>
 
-            <select
-              value={selectedDoctor}
-              onChange={(e) => setSelectedDoctor(e.target.value)}
-              className={styles.elegantSelect}
-            >
-              <option value="">-- Choose Specialist --</option>
+          <div className={styles.doctorGrid}>
 
-              {doctors.map((doc, idx) => (
-                <option key={idx} value={doc.id}>
-                  Dr. {doc.fullName} ({doc.specialization})
-                </option>
-              ))}
-            </select>
-          </section>
+            {doctors.map((doctor, index) => (
 
-          {/* UPLOAD */}
-          <section className={`${styles.dashboardCard} ${styles.featuredCard}`}>
-            <h3>New Analysis</h3>
+              <div
+                key={index}
+                className={styles.doctorCard}
+              >
 
-            <div
-              className={styles.uploadZone}
-              onClick={() =>
-                !loading &&
-                document.getElementById('fileUpload').click()
-              }
-            >
-              <span className={styles.uploadIconLarge}>
-                {loading ? '⏳' : '📸'}
-              </span>
+                {doctor.profileImage ? (
 
-              <p>
-                {loading ? 'Uploading...' : 'Upload New Scan'}
-              </p>
+                  <img
+                    src={doctor.profileImage}
+                    alt="Doctor"
+                    className={styles.doctorImage}
+                  />
 
-              <input
-                type="file"
-                id="fileUpload"
-                hidden
-                accept=".jpg, .png, .jpeg"
-                onChange={handleUpload}
-              />
-            </div>
-          </section>
+                ) : (
 
-          {/* LATEST RESULT */}
-          <section className={styles.dashboardCard}>
-            <h3>Latest Result</h3>
+                  <div className={styles.defaultDoctorAvatar}>
+                    {doctor.fullname?.charAt(0)}
+                  </div>
 
-            {myReports.length > 0 ? (
-              <div className={styles.miniReportCard}>
+                )}
 
-                <p>
-                  Status:
-                  <strong>
-                    {" "}
-                    {myReports[myReports.length - 1].baldnessStage}
-                  </strong>
+                <h3>
+                  Dr. {doctor.fullname}
+                </h3>
+
+                <p className={styles.specialityText}>
+                  {doctor.speciality || "Hair Specialist"}
                 </p>
 
+                <div className={styles.doctorMeta}>
+                  📞 {doctor.contactNumber || "Not Added"}
+                </div>
+
+                <div className={styles.scheduleBox}>
+
+                  <strong>
+                    Weekly Schedule:
+                  </strong>
+
+                  <div className={styles.scheduleDays}>
+                    {doctor.weeklySchedule?.length > 0
+                      ? doctor.weeklySchedule.join(", ")
+                      : "Not Available"}
+                  </div>
+
+                </div>
+
                 <button
-                  onClick={() =>
-                    downloadPDF(myReports[myReports.length - 1])
+                  className={
+                    selectedDoctor === doctor.fullname
+                      ? styles.selectedDoctorBtn
+                      : styles.selectDoctorBtn
                   }
-                  className={styles.historyBtn}
+                  onClick={() => {
+                    setSelectedDoctor(doctor.fullname);
+                    setSelectedDoctorName(doctor.fullname);
+                  }}
                 >
-                  Download Latest PDF
+                  {selectedDoctor === doctor.fullname
+                    ? "Selected"
+                    : "Select Doctor"}
                 </button>
 
               </div>
-            ) : (
-              <div className={styles.emptyStateMini}>
-                Waiting for results...
-              </div>
-            )}
-          </section>
 
-        </div>
+            ))}
+
+          </div>
+
+        </section>
+
+        {/* UPLOAD */}
+        <section
+          className={`${styles.dashboardCard} ${styles.featuredCard}`}
+        >
+
+          <h3>
+            📸 Upload New Scan
+          </h3>
+
+          <div
+            className={styles.uploadZone}
+            onClick={() =>
+              !loading &&
+              document.getElementById("fileUpload").click()
+            }
+          >
+
+            <span className={styles.uploadIconLarge}>
+              {loading ? "⏳" : "📤"}
+            </span>
+
+            <p>
+              {loading
+                ? "Uploading..."
+                : selectedDoctor
+                ? `Send Scan To Dr. ${selectedDoctorName}`
+                : "Select Doctor First"}
+            </p>
+
+            <input
+              type="file"
+              id="fileUpload"
+              hidden
+              accept=".jpg,.jpeg,.png"
+              onChange={handleUpload}
+            />
+
+          </div>
+
+        </section>
 
         {/* HISTORY */}
         <section className={styles.gallerySection}>
 
           <h2 className={styles.sectionTitle}>
-            My Scans & History
+            My Scan History
           </h2>
 
           {dataLoading ? (
 
             <div className={styles.loadingState}>
-              Syncing records...
+              Loading records...
             </div>
 
           ) : myScans.length > 0 ? (
@@ -305,7 +392,10 @@ export default function PatientDashboard() {
 
               {myScans.map((s, idx) => (
 
-                <div key={idx} className={styles.scanCard}>
+                <div
+                  key={idx}
+                  className={styles.scanCard}
+                >
 
                   <img
                     src={`http://localhost:8000${s.imagePath}`}
@@ -331,13 +421,21 @@ export default function PatientDashboard() {
                       {s.status}
                     </span>
 
-               {s.status === "Processed" && myReports?.some(r =>r.scanId === s.id &&r.baldnessStage &&r.baldnessStage !== "Results Pending") && (
-                <button onClick={() => handleDownloadForScan(s.id)}className={styles.miniDownloadBtn}>
-                 Download Report
-                </button>
-              )}
+                    {s.status === "Processed" && (
+
+                      <button
+                        onClick={() =>
+                          handleDownloadForScan(s.id)
+                        }
+                        className={styles.miniDownloadBtn}
+                      >
+                        Download Report
+                      </button>
+
+                    )}
 
                   </div>
+
                 </div>
 
               ))}
@@ -347,7 +445,7 @@ export default function PatientDashboard() {
           ) : (
 
             <div className={styles.emptyGallery}>
-              <p>No scans uploaded yet.</p>
+              No scans uploaded yet.
             </div>
 
           )}
@@ -355,6 +453,8 @@ export default function PatientDashboard() {
         </section>
 
       </main>
+
     </div>
   );
 }
+

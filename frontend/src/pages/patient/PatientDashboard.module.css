@@ -473,3 +473,116 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================
+   DOCTOR CARDS
+========================= */
+
+.doctorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+  gap: 25px;
+}
+
+.doctorCard {
+  background: white;
+  border-radius: 22px;
+  padding: 25px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+  transition: 0.3s;
+}
+
+.doctorCard:hover {
+  transform: translateY(-5px);
+}
+
+.doctorImage {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 15px;
+  border: 4px solid #3b82f6;
+}
+
+.defaultDoctorAvatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.specialityText {
+  color: #475569;
+  margin: 10px 0;
+  font-weight: 600;
+}
+
+.doctorMeta {
+  margin-top: 10px;
+  color: #334155;
+  font-size: 14px;
+}
+
+.scheduleBox {
+  margin-top: 16px;
+  padding: 14px;
+  background: #f8fafc;
+  border-radius: 14px;
+}
+
+.scheduleDays {
+  margin-top: 8px;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.selectDoctorBtn {
+  margin-top: 20px;
+  width: 100%;
+  border: none;
+  background: #2563eb;
+  color: white;
+  padding: 14px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.selectedDoctorBtn {
+  margin-top: 20px;
+  width: 100%;
+  border: none;
+  background: #059669;
+  color: white;
+  padding: 14px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.statusProcessed {
+  background: #dcfce7;
+  color: #166534;
+  padding: 6px 14px;
+  border-radius: 20px;
+  width: fit-content;
+  font-weight: 700;
+}
+
+.statusPending {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 6px 14px;
+  border-radius: 20px;
+  width: fit-content;
+  font-weight: 700;
+}

@@ -23,6 +23,16 @@ export default function DoctorDashboard() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [portalReports, setPortalReports] = useState([]);
   const [directReports, setDirectReports] = useState([]);
+  const [showProfile, setShowProfile] = useState(false);
+
+  const [profileImage, setProfileImage] = useState("");
+
+  const [speciality, setSpeciality] = useState("");
+
+  const [contactNumber, setContactNumber] = useState("");
+
+  const [weeklySchedule, setWeeklySchedule] = useState([]);
+  const [profileFile, setProfileFile] = useState(null);
 
   useEffect(() => {
     if (localStorage.getItem("userRole") !== "doctor") {
@@ -31,6 +41,7 @@ export default function DoctorDashboard() {
     }
 
     fetchData();
+    fetchProfile();
   }, [navigate]);
 
   const fetchData = async () => {
@@ -55,7 +66,25 @@ export default function DoctorDashboard() {
       setLoading(false);
     }
   };
+  const fetchProfile = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8000/api/doctor/profile/${doctorName}`,
+      );
 
+      const doctor = res.data;
+
+      setProfileImage(doctor.profileImage || "");
+
+      setSpeciality(doctor.speciality || doctor.specialization || "");
+
+      setContactNumber(doctor.contactNumber || doctor.phone || "");
+
+      setWeeklySchedule(doctor.weeklySchedule || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const downloadReport = (data) => {
     try {
       const doc = new jsPDF();
@@ -93,7 +122,47 @@ export default function DoctorDashboard() {
       Swal.fire("Error", "PDF Generation Failed.", "error");
     }
   };
+  const saveProfile = async () => {
+    try {
+      let uploadedImagePath = profileImage;
 
+      // IMAGE UPLOAD
+      if (profileFile) {
+        const formData = new FormData();
+
+        formData.append("file", profileFile);
+
+        const uploadRes = await axios.post(
+          "http://localhost:8000/api/doctor/upload-profile-image",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          },
+        );
+
+        uploadedImagePath = uploadRes.data.imagePath;
+      }
+
+      // PROFILE SAVE
+      await axios.put("http://localhost:8000/api/doctor/update-profile", {
+        doctorName,
+        speciality,
+        contactNumber,
+        weeklySchedule,
+        profileImage: uploadedImagePath,
+      });
+
+      Swal.fire("Saved", "Profile Updated Successfully", "success");
+
+      fetchProfile();
+    } catch (err) {
+      console.log(err);
+
+      Swal.fire("Error", "Could not save profile", "error");
+    }
+  };
   const handleAnalyse = async (scan) => {
     const confirm = await Swal.fire({
       title: "Analyze Image?",
@@ -231,10 +300,138 @@ export default function DoctorDashboard() {
       {/* MAIN CONTENT */}
       <main className={styles.mainContent}>
         <header className={styles.header}>
-          <h1>Welcome, Dr. {doctorName}</h1>
-
+          <h1>Welcome To The Doctor Dashboad</h1>
           <p>Review patient scans and run AI diagnostics.</p>
         </header>
+        <div className={styles.profileSection}>
+          <div className={styles.profileLeft}>
+            <div className={styles.profileImageWrapper}>
+              {profileImage ? (
+                <img
+                  src={`http://localhost:8000${profileImage}`}
+                  alt="Doctor"
+                  className={styles.profileImage}
+                />
+              ) : (
+                <div className={styles.defaultAvatar}>
+                  {doctorName?.charAt(0).toUpperCase()}
+                </div>
+              )}
+
+              <button className={styles.editImageBtn}>✎</button>
+            </div>
+
+            <div className={styles.profileInfo}>
+              <h2>Dr. {doctorName}</h2>
+
+              <p>{speciality || "Hair Specialist"}</p>
+
+              <div className={styles.profileMeta}>
+                <div className={styles.metaItem}>
+                  📞 {contactNumber || "Not Added"}
+                </div>
+
+                <div className={styles.metaItem}>
+                  🗓 {weeklySchedule.length} Days Available
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            className={styles.editProfileBtn}
+            onClick={() => setShowProfile(!showProfile)}
+          >
+            Edit Profile
+          </button>
+        </div>
+
+        {showProfile && (
+          <div className={styles.profileModal}>
+            <div className={styles.profileGrid}>
+              <div className={styles.profileInputGroup}>
+                <label>Speciality</label>
+
+                <input
+                  type="text"
+                  className={styles.profileInput}
+                  value={speciality}
+                  onChange={(e) => setSpeciality(e.target.value)}
+                />
+              </div>
+
+              <div className={styles.profileInputGroup}>
+                <label>Contact Number</label>
+
+                <input
+                  type="text"
+                  className={styles.profileInput}
+                  value={contactNumber}
+                  onChange={(e) => setContactNumber(e.target.value)}
+                />
+              </div>
+
+              <div className={styles.profileInputGroup}>
+                <label>Upload Profile Image</label>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  className={styles.profileInput}
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+
+                    if (file) {
+                      setProfileFile(file);
+
+                      setProfileImage(URL.createObjectURL(file));
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className={styles.scheduleWrapper}>
+              <h3 className={styles.scheduleTitle}>Weekly Availability</h3>
+
+              <div className={styles.scheduleGrid}>
+                {[
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday",
+                  "Sunday",
+                ].map((day) => (
+                  <div key={day} className={styles.scheduleCard}>
+                    <label className={styles.scheduleLabel}>
+                      <input
+                        type="checkbox"
+                        checked={weeklySchedule.includes(day)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setWeeklySchedule([...weeklySchedule, day]);
+                          } else {
+                            setWeeklySchedule(
+                              weeklySchedule.filter((d) => d !== day),
+                            );
+                          }
+                        }}
+                      />
+
+                      <span>{day}</span>
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button className={styles.saveProfileBtn} onClick={saveProfile}>
+              Save Profile
+            </button>
+          </div>
+        )}
         <div className={styles.dashboardCards}>
           <div className={styles.cardBlue}>
             <h3>Online Patients</h3>
