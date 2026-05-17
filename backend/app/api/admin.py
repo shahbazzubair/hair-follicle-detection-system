@@ -2,12 +2,27 @@ from fastapi import APIRouter, HTTPException
 from bson import ObjectId
 from app.core.database import user_collection
 
+import os
+import smtplib
+
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 router = APIRouter()
 
-# 1. Fetch all users for the dashboard table
+# =========================================
+# 1. FETCH ALL USERS
+# =========================================
+
 @router.get("/users")
 async def get_all_users():
+
     users = await user_collection.find().to_list(1000)
+
     return [
         {
             "id": str(user["_id"]),
@@ -17,21 +32,171 @@ async def get_all_users():
             "role": user.get("role"),
             "status": user.get("status", "Active"),
             "specialization": user.get("specialization"),
-            "degree_path": user.get("degree_path") 
-        } for user in users
+            "degree_path": user.get("degree_path")
+        }
+        for user in users
     ]
 
-# 2. Verify a pending doctor
+
+# =========================================
+# 2. APPROVE / REJECT DOCTOR
+# =========================================
+
 @router.put("/verify-doctor/{user_id}")
 async def verify_doctor(user_id: str, data: dict):
-    await user_collection.update_one(
-        {"_id": ObjectId(user_id)},
-        {"$set": {"status": data.get("status")}}
-    )
-    return {"status": "success", "message": "Doctor verified"}
 
-# 3. Delete a user
+    status = data.get("status")
+
+    doctor = await user_collection.find_one({
+        "_id": ObjectId(user_id)
+    })
+
+    if not doctor:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Doctor not found"
+        )
+
+    sender_email = os.getenv("MAIL_USERNAME")
+    sender_password = os.getenv("MAIL_PASSWORD")
+
+    smtp_server = os.getenv(
+        "MAIL_SERVER",
+        "smtp.gmail.com"
+    )
+
+    smtp_port = int(
+        os.getenv("MAIL_PORT", 587)
+    )
+
+    doctor_email = doctor.get("email")
+    doctor_name = doctor.get("fullName")
+
+    # =====================================
+    # APPROVE DOCTOR
+    # =====================================
+
+    if status == "Approved":
+
+        await user_collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"status": "Approved"}}
+        )
+
+        subject = "Doctor Account Approved"
+
+        body = f"""
+Hello Dr. {doctor_name},
+We are pleased to inform you that your registration request for the Hair Follicle Detection AI Portal has been successfully approved by the administration team.
+
+Your account is now active, and you may log in to the platform using your registered credentials.
+
+We appreciate your interest in joining our platform and look forward to your valuable contribution.
+
+Best Regards,
+Hair Follicle Detection AI Team
+"""
+
+    # =====================================
+    # REJECT DOCTOR
+    # =====================================
+
+    elif status == "Rejected":
+
+        subject = "Doctor Account Rejected"
+
+        body = f"""
+Hello Dr. {doctor_name},
+
+Thank you for your interest in registering with the Hair Follicle Detection AI Portal.
+
+After careful review of your submitted application, we regret to inform you that your registration request could not be approved at this time.
+
+If you believe this decision was made in error or you require further clarification, please feel free to contact the administration team.
+
+We sincerely appreciate your time and interest.
+
+Best Regards,
+Hair Follicle Detection AI Team
+"""
+
+    else:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid status"
+        )
+
+    # =====================================
+    # SEND EMAIL
+    # =====================================
+
+    try:
+
+        msg = MIMEMultipart()
+
+        msg["From"] = sender_email
+        msg["To"] = doctor_email
+        msg["Subject"] = subject
+
+        msg.attach(
+            MIMEText(body, "plain")
+        )
+
+        server = smtplib.SMTP(
+            smtp_server,
+            smtp_port
+        )
+
+        server.starttls()
+
+        server.login(
+            sender_email,
+            sender_password
+        )
+
+        server.send_message(msg)
+
+        server.quit()
+
+    except Exception as e:
+
+        print("EMAIL ERROR:", e)
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Email sending failed: {str(e)}"
+        )
+
+    # =====================================
+    # DELETE REJECTED DOCTOR
+    # =====================================
+
+    if status == "Rejected":
+
+        await user_collection.delete_one({
+            "_id": ObjectId(user_id)
+        })
+
+    return {
+        "status": "success",
+        "message": f"Doctor {status.lower()} successfully"
+    }
+
+
+# =========================================
+# 3. DELETE USER
+# =========================================
+
 @router.delete("/delete-user/{user_id}")
 async def delete_user(user_id: str):
-    await user_collection.delete_one({"_id": ObjectId(user_id)})
-    return {"status": "success", "message": "User deleted"}
+
+    await user_collection.delete_one({
+        "_id": ObjectId(user_id)
+    })
+
+    return {
+        "status": "success",
+        "message": "User deleted"
+    }

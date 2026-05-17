@@ -433,19 +433,22 @@ export default function DoctorDashboard() {
           </div>
         )}
         <div className={styles.dashboardCards}>
-          <div className={styles.cardBlue}>
-            <h3>Online Patients</h3>
-            <h1>{portalReports.length}</h1>
+          <div className={`${styles.statsCard} ${styles.cardBlue}`}>
+            <p className={styles.cardLabel}>Online Patients</p>
+
+            <h1 className={styles.cardValue}>{portalReports.length}</h1>
           </div>
 
-          <div className={styles.cardGreen}>
-            <h3>Direct Analysis</h3>
-            <h1>{directReports.length}</h1>
+          <div className={`${styles.statsCard} ${styles.cardGreen}`}>
+            <p className={styles.cardLabel}>Direct Analysis</p>
+
+            <h1 className={styles.cardValue}>{directReports.length}</h1>
           </div>
 
-          <div className={styles.cardDark}>
-            <h3>Total Reports</h3>
-            <h1>{reports.length}</h1>
+          <div className={`${styles.statsCard} ${styles.cardDark}`}>
+            <p className={styles.cardLabel}>Total Reports</p>
+
+            <h1 className={styles.cardValue}>{reports.length}</h1>
           </div>
         </div>
 

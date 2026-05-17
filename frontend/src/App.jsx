@@ -1,43 +1,41 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import ScrollToTop from './components/ScrollToTop';
+import ScrollToTop from "./components/ScrollToTop";
 
 // --- Layout Components ---
-import Navbar from './components/Navbar/Navbar';
-import Footer from './components/Footer/Footer';
+import Navbar from "./components/Navbar/Navbar";
+import Footer from "./components/Footer/Footer";
 
 // --- Landing Page ---
-import Hero from './pages/landing_page/Hero';
-import Testimonials from './pages/landing_page/Testimonials';
-import Methodology from './pages/landing_page/Methodology';
-import Privacy from './pages/Privacy';
-import Terms from './pages/Terms';
-import Contact from './pages/Contact';
+import Hero from "./pages/landing_page/Hero";
+import Testimonials from "./pages/landing_page/Testimonials";
+import Methodology from "./pages/landing_page/Methodology";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Contact from "./pages/Contact";
 
 // --- Authentication ---
-import Login from './pages/auth/Login';
-import Signup from './pages/auth/Signup';
-import ForgotPassword from './pages/auth/ForgotPassword';
-import ResetPassword from './pages/auth/ResetPassword';
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 // --- Admin Portal ---
-import AdminLogin from './pages/admin/AdminLogin';
-import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 // --- Dashboards ---
-import PatientDashboard from './pages/patient/PatientDashboard';
-import DoctorDashboard from './pages/doctor/DoctorDashboard';
+import PatientDashboard from "./pages/patient/PatientDashboard";
+import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 
 export default function App() {
   return (
     <Router>
-
       {/* AUTO SCROLL TO TOP */}
       <ScrollToTop />
 
       <Routes>
-
         {/* === PORTALS & DASHBOARDS === */}
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
@@ -48,12 +46,26 @@ export default function App() {
         <Route
           path="/*"
           element={
-            <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                minHeight: "100vh",
+              }}
+            >
               <Navbar />
 
               <main style={{ flex: 1 }}>
                 <Routes>
-                  <Route path="/" element={<><Hero /><Testimonials /></>} />
+                  <Route
+                    path="/"
+                    element={
+                      <>
+                        <Hero />
+                        <Testimonials />
+                      </>
+                    }
+                  />
                   <Route path="/methodology" element={<Methodology />} />
 
                   {/* Auth */}
