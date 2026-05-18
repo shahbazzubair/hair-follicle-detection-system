@@ -37,4 +37,4 @@ async def startup_db_client():
 
 @app.get("/")
 async def root():
-    return {"status": "online", "message": "Welcome to the HFD AI API!"}
+    return {"status": "online", "message": "Welcome to the HFD AI!"}
