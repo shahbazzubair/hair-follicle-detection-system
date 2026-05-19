@@ -1,7 +1,5 @@
-/* src/features/landing_page/Hero.module.css */
-
 .hero {
-   margin-top: 80px;
+  margin-top: 80px;
   padding: 60px 0 80px;
   background: radial-gradient(circle at top right, #eff6ff, #ffffff);
   min-height: 80vh;
@@ -14,7 +12,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
-  display: flex; /* Use flex for side-by-side layout */
+  display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 40px;
@@ -22,7 +20,7 @@
 }
 
 .content {
-  flex: 1; /* Takes up left side */
+  flex: 1;
   text-align: left;
 }
 
@@ -39,6 +37,7 @@
   letter-spacing: 0.4px;
   margin-bottom: 28px;
 }
+
 .title {
   font-size: clamp(2.5rem, 5vw, 3.5rem);
   line-height: 1.2;
@@ -65,15 +64,20 @@
 .btnPrimary {
   background: #2563eb;
   color: white;
-  border: none;
+  text-decoration: none;
   padding: 14px 28px;
   border-radius: 8px;
   font-weight: 600;
-  cursor: pointer;
+  display: inline-block;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* IMAGE SECTION WITH SCANNING */
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
 .imageWrapper {
   flex: 1; 
   position: relative;
@@ -118,7 +122,6 @@
   100% { top: 100%; opacity: 0; }
 }
 
-/* Mobile Fix */
 @media (max-width: 968px) {
   .container {
     flex-direction: column;

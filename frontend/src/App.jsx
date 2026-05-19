@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
 
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -29,6 +29,21 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 
+// --- ENHANCED: Main Layout Wrapper ---
+// Keeps the Navbar and Footer logic completely separate from the routing tree
+const MainLayout = () => {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <Navbar />
+      <main style={{ flex: 1 }}>
+        {/* Outlet acts as a placeholder for whatever child route is currently active */}
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
 export default function App() {
   return (
     <Router>
@@ -36,55 +51,39 @@ export default function App() {
       <ScrollToTop />
 
       <Routes>
-        {/* === PORTALS & DASHBOARDS === */}
+        {/* === PORTALS & DASHBOARDS (No Navbar/Footer) === */}
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
 
-        {/* === MAIN WEBSITE === */}
-        <Route
-          path="/*"
-          element={
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                minHeight: "100vh",
-              }}
-            >
-              <Navbar />
+        {/* === MAIN WEBSITE (Wrapped with Navbar/Footer) === */}
+        <Route element={<MainLayout />}>
+          
+          {/* Landing & Info */}
+          <Route 
+            path="/" 
+            element={
+              <>
+                <Hero />
+                <Testimonials />
+              </>
+            } 
+          />
+          <Route path="/methodology" element={<Methodology />} />
 
-              <main style={{ flex: 1 }}>
-                <Routes>
-                  <Route
-                    path="/"
-                    element={
-                      <>
-                        <Hero />
-                        <Testimonials />
-                      </>
-                    }
-                  />
-                  <Route path="/methodology" element={<Methodology />} />
+          {/* Authentication */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-                  {/* Auth */}
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route path="/reset-password/:token" element={<ResetPassword />} />
-
-                  {/* Legal */}
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/contact" element={<Contact />} />
-                </Routes>
-              </main>
-
-              <Footer />
-            </div>
-          }
-        />
+          {/* Legal */}
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/contact" element={<Contact />} />
+          
+        </Route>
       </Routes>
     </Router>
   );

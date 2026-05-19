@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // Added this import
+import { Link } from 'react-router-dom';
 import styles from './Hero.module.css';
 import baldHeadImage from '../../assets/bald_head.png'; 
 
@@ -19,7 +19,6 @@ const Hero = () => {
             accessible to everyone.
           </p>
           <div className={styles.btnGroup}>
-            {/* Updated button to Link component */}
             <Link to="/methodology" className={styles.btnPrimary}>
               View Methodology
             </Link>

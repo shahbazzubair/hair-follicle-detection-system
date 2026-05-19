@@ -1,11 +1,9 @@
-/* src/components/Footer/Footer.module.css */
-
-footer {
+.footer {
   width: 100%;
-  background-color: #a0c9f1; /* Clean white background to match your professional theme [cite: 38] */
+  background-color: #a0c9f1;
   border-top: 1px solid #e2e8f0;
   padding: 30px 0;
-  margin-top: auto; /* Works with flexbox in App.css to stay at bottom */
+  margin-top: auto;
 }
 
 .container {
@@ -15,7 +13,7 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: black; /* Professional slate gray color */
+  color: black;
   font-size: 0.9rem;
 }
 
@@ -26,15 +24,14 @@ footer {
 
 .legalLinks a {
   text-decoration: none;
-  color:black;
+  color: black;
   transition: color 0.2s ease;
 }
 
 .legalLinks a:hover {
-  color: #2563eb; /* Primary blue color from your SDS [cite: 184] */
+  color: #2563eb;
 }
 
-/* Mobile Responsiveness */
 @media (max-width: 768px) {
   .container {
     flex-direction: column;

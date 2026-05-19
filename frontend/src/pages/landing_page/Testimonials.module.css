@@ -1,10 +1,5 @@
-/* =========================
-   TESTIMONIAL SECTION
-========================= */
-
 .testimonialSection {
   padding: 90px 0;
-  /* padding-top: 140px; */
   background: linear-gradient(135deg, #81dadd, #175b88);
   overflow: hidden;
 }
@@ -28,58 +23,50 @@
 }
 
 .subtitle {
-  color:black;
+  color: black;
   margin-bottom: 60px;
   font-size: 1.1rem;
 }
 
-/* =========================
-   SLIDER
-========================= */
-
+/* --- SLIDER FIXES --- */
 .slider {
   width: 100%;
   overflow: hidden;
   position: relative;
-  display: flex;
-  justify-content: center;
 }
 
 .sliderTrack {
   display: flex;
   width: 100%;
-  animation: singleSlide 6s infinite;
+  /* This transition handles the smooth animation instead of keyframes! */
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .slide {
   min-width: 100%;
+  flex: 0 0 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 10px; /* Prevents shadow clipping */
 }
 
-/* =========================
-   CARD
-========================= */
-
+/* --- CARD --- */
 .card {
   width: 100%;
   max-width: 700px;
   min-height: 320px;
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   padding: 40px;
   border-radius: 24px;
   text-align: left;
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 10px 35px rgba(0,0,0,0.25);
-  transition: 0.4s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
   position: relative;
   overflow: hidden;
-   transition: all 0.4s ease;
+  transition: all 0.4s ease;
 }
-
-/* TOP BLUE ANIMATION LINE */
 
 .card::before {
   content: "";
@@ -88,25 +75,20 @@
   left: -100%;
   width: 100%;
   height: 5px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #38bdf8,
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, #38bdf8, transparent);
   animation: lineMove 6s linear infinite;
 }
 
 .card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  transform: translateY(-5px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
 }
 
 .quoteIcon {
-  font-size: 5rem;
+  font-size: 4rem;
   color: #60a5fa;
   line-height: 0;
-  margin-bottom: 25px;
+  margin-bottom: 35px;
   font-family: serif;
   opacity: 0.3;
 }
@@ -119,10 +101,7 @@
   font-size: 1rem;
 }
 
-/* =========================
-   PROFILE
-========================= */
-
+/* --- PROFILE --- */
 .profile {
   display: flex;
   align-items: center;
@@ -130,19 +109,12 @@
 }
 
 .avatar {
-  width: 100px;
-  height: 100px;
-
+  width: 80px;
+  height: 80px;
   object-fit: cover;
-
   border-radius: 50%;
-
-  border: 5px solid #38bdf8;
-
-  box-shadow: 0 8px 22px rgba(37,99,235,0.35);
-
-  overflow: hidden;
-
+  border: 4px solid #38bdf8;
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.35);
   flex-shrink: 0;
 }
 
@@ -160,64 +132,13 @@
   margin: 5px 0 0;
 }
 
-/* =========================
-   ANIMATIONS
-========================= */
-
-@keyframes singleSlide {
-
-  0% {
-    transform: translateX(0%);
-  }
-
-  30% {
-    transform: translateX(0%);
-  }
-
-  33% {
-    transform: translateX(-100%);
-  }
-
-  63% {
-    transform: translateX(-100%);
-  }
-
-  66% {
-    transform: translateX(-200%);
-  }
-
-  96% {
-    transform: translateX(-200%);
-  }
-
-  100% {
-    transform: translateX(0%);
-  }
-}
-
+/* --- ANIMATIONS & RESPONSIVE --- */
 @keyframes lineMove {
-
-  0% {
-    left: -100%;
-  }
-
-  100% {
-    left: 100%;
-  }
+  0% { left: -100%; }
+  100% { left: 100%; }
 }
-
-/* =========================
-   RESPONSIVE
-========================= */
 
 @media (max-width: 768px) {
-
-  .title {
-    font-size: 2.2rem;
-  }
-
-  .card {
-    padding: 25px;
-    min-height: auto;
-  }
+  .title { font-size: 2.2rem; }
+  .card { padding: 25px; min-height: auto; }
 }

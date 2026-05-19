@@ -1,5 +1,3 @@
-/* src/components/Navbar/Navbar.module.css */
-
 .navbar {
   width: 100%;
   height: 80px;
@@ -25,8 +23,6 @@
   align-items: center;
 }
 
-/* LOGO */
-
 .logo {
   font-size: 1.7rem;
   font-weight: 800;
@@ -39,45 +35,17 @@
   color: #2563eb;
 }
 
-/* RIGHT SECTION */
-
 .rightSection {
   display: flex;
   align-items: center;
   gap: 40px;
 }
 
-/* NAV LINKS */
-
-.navLinks {
-  display: flex;
-  list-style: none;
-  gap: 30px;
-  margin: 0;
-  padding: 0;
-}
-
-.navLinks a {
-  text-decoration: none;
-  color: #4b5563;
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: 0.3s;
-}
-
-.navLinks a:hover {
-  color: #2563eb;
-}
-
-/* AUTH BUTTONS */
-
 .authButtons {
   display: flex;
   align-items: center;
   gap: 15px;
 }
-
-/* ACTIVE BUTTON */
 
 .activeBtn {
   text-decoration: none;
@@ -94,8 +62,6 @@
   transform: translateY(-2px);
 }
 
-/* INACTIVE BUTTON */
-
 .inactiveBtn {
   text-decoration: none;
   color: #111827;
@@ -109,8 +75,6 @@
   background: rgba(37, 99, 235, 0.08);
   color: #2563eb;
 }
-
-/* HAMBURGER */
 
 .menuIcon {
   display: none;
@@ -128,17 +92,9 @@
   border-radius: 2px;
 }
 
-/* MOBILE */
-
 @media (max-width: 768px) {
-
-  .container {
-    padding: 0 20px;
-  }
-
-  .menuIcon {
-    display: flex;
-  }
+  .container { padding: 0 20px; }
+  .menuIcon { display: flex; }
 
   .rightSection {
     position: fixed;
@@ -149,27 +105,13 @@
     background: #f8fafc;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
     padding: 40px 0;
     transition: 0.4s ease-in-out;
     gap: 30px;
     z-index: 999;
   }
 
-  .showMenu {
-    left: 0;
-  }
-
-  .navLinks {
-    flex-direction: column;
-    align-items: center;
-    gap: 25px;
-    display: flex;
-  }
-
-  .navLinks a {
-    font-size: 1.1rem;
-  }
+  .showMenu { left: 0; }
 
   .authButtons {
     flex-direction: column;
@@ -177,24 +119,13 @@
     gap: 15px;
   }
 
-  .activeBtn,
-  .inactiveBtn {
+  .activeBtn, .inactiveBtn {
     width: 100%;
     text-align: center;
     padding: 15px;
   }
 
-  /* HAMBURGER ANIMATION */
-
-  .bar1 {
-    transform: rotate(-45deg) translate(-5px, 6px);
-  }
-
-  .bar2 {
-    opacity: 0;
-  }
-
-  .bar3 {
-    transform: rotate(45deg) translate(-5px, -6px);
-  }
+  .bar1 { transform: rotate(-45deg) translate(-5px, 6px); }
+  .bar2 { opacity: 0; }
+  .bar3 { transform: rotate(45deg) translate(-5px, -6px); }
 }
