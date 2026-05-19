@@ -10,19 +10,12 @@ export default function PatientDashboard() {
   const navigate = useNavigate();
 
   const [userName] = useState(localStorage.getItem("userName"));
-
   const [doctors, setDoctors] = useState([]);
-
   const [selectedDoctor, setSelectedDoctor] = useState("");
-
   const [selectedDoctorName, setSelectedDoctorName] = useState("");
-
   const [loading, setLoading] = useState(false);
-
   const [dataLoading, setDataLoading] = useState(true);
-
   const [myScans, setMyScans] = useState([]);
-
   const [myReports, setMyReports] = useState([]);
 
   useEffect(() => {
@@ -30,26 +23,17 @@ export default function PatientDashboard() {
       navigate("/login", { replace: true });
       return;
     }
-
     fetchPatientData();
   }, [userName, navigate]);
 
   const fetchPatientData = async () => {
     setDataLoading(true);
-
     try {
-      // UPDATED API
-      const docRes = await axios.get(
-        "http://localhost:8000/api/doctor/all-doctors",
-      );
+      const docRes = await axios.get("http://localhost:8000/api/doctor/all-doctors");
       setDoctors(docRes.data);
 
-      const dataRes = await axios.get(
-        `http://localhost:8000/api/patient/data/${userName}`,
-      );
-
+      const dataRes = await axios.get(`http://localhost:8000/api/patient/data/${userName}`);
       setMyScans(dataRes.data.scans || []);
-
       setMyReports(dataRes.data.reports || []);
     } catch (err) {
       console.error(err);
@@ -61,18 +45,12 @@ export default function PatientDashboard() {
   const downloadPDF = (report) => {
     try {
       const doc = new jsPDF();
-
       doc.setFont("helvetica", "bold");
-
-      doc.text("HAIR FOLLICLE ANALYSIS REPORT", 105, 20, {
-        align: "center",
-      });
+      doc.text("HAIR FOLLICLE ANALYSIS REPORT", 105, 20, { align: "center" });
 
       autoTable(doc, {
         startY: 40,
-
         head: [["Metric", "Details"]],
-
         body: [
           ["Patient Name", userName],
           ["Doctor", `Dr. ${report.doctorName}`],
@@ -90,7 +68,6 @@ export default function PatientDashboard() {
 
   const handleDownloadForScan = (scanId) => {
     const report = myReports.find((r) => r.scanId === scanId);
-
     if (report) {
       downloadPDF(report);
     } else {
@@ -100,51 +77,36 @@ export default function PatientDashboard() {
 
   const handleUpload = async (e) => {
     const file = e.target.files[0];
-
     if (!file) return;
 
     if (!selectedDoctor) {
       Swal.fire("Required", "Please select a doctor first.", "warning");
-
       return;
     }
 
     setLoading(true);
-
     const formData = new FormData();
-
     formData.append("patientName", userName);
-
     formData.append("doctorId", selectedDoctor);
-
     formData.append("image", file);
 
     try {
-      await axios.post(
-        "http://localhost:8000/api/patient/upload-scan",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        },
-      );
+      await axios.post("http://localhost:8000/api/patient/upload-scan", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       Swal.fire("Success", `Scan sent to Dr. ${selectedDoctorName}`, "success");
-
       fetchPatientData();
     } catch (err) {
       Swal.fire("Error", "Upload failed.", "error");
     } finally {
       setLoading(false);
-
-      e.target.value = null;
+      e.target.value = null; // reset input
     }
   };
 
   const handleLogout = () => {
     localStorage.clear();
-
     navigate("/login", { replace: true });
   };
 
@@ -163,12 +125,10 @@ export default function PatientDashboard() {
             <div className={styles.avatar}>
               {userName?.charAt(0).toUpperCase()}
             </div>
-
             <div className={styles.userMeta}>
               <span className={styles.actualName}>{userName}</span>
             </div>
           </div>
-
           <button className={styles.logoutBtn} onClick={handleLogout}>
             Logout
           </button>
@@ -179,120 +139,112 @@ export default function PatientDashboard() {
       <main className={styles.mainContent}>
         <div className={styles.welcomeHero}>
           <h2>Welcome, {userName}</h2>
-
           <p>Upload scalp scans and select your preferred doctor.</p>
         </div>
 
-        {/* DOCTOR SECTION */}
-        <section className={styles.dashboardCard}>
-          <h3>👨‍⚕️ Choose Specialist</h3>
-
-          <div className={styles.doctorDropdown}>
-            {doctors.map((doc, idx) => (
-              <div
-                key={idx}
-                className={`${styles.doctorOption} ${
-                  selectedDoctor === doc.id ? styles.activeDoctorOption : ""
-                }`}
-                onClick={() => {
-                  setSelectedDoctor(doc.id);
-                  setSelectedDoctorName(doc.fullName);
-                }}
-              >
-                {/* IMAGE CLICK => DETAILS */}
-                <div
-                  className={styles.doctorImageWrapper}
-                  onClick={() =>
-                    Swal.fire({
-                      title: `Dr. ${doc.fullName}`,
-                      html: `
-                <p><b>Speciality:</b> ${doc.speciality || "Hair Specialist"}</p>
-
-                <p><b>Contact:</b> ${doc.contactNumber || "Not Added"}</p>
-
-                <p><b>Available Days:</b> ${
-                  doc.weeklySchedule?.join(", ") || "No Schedule"
-                }</p>
-              `,
-                      imageUrl: doc.profileImage
-                        ? `http://localhost:8000${doc.profileImage}`
-                        : "",
-                      imageWidth: 120,
-                      confirmButtonColor: "#2563eb",
-                    })
-                  }
-                >
-                  {doc.profileImage ? (
-                    <img
-                      src={`http://localhost:8000${doc.profileImage}`}
-                      alt={doc.fullName}
-                      className={styles.doctorMiniImage}
-                    />
-                  ) : (
-                    <div className={styles.defaultMiniAvatar}>
-                      {doc.fullName?.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
-
-                {/* NAME CLICK => SELECT */}
-                <div
-                  onClick={() => {
-                    if (selectedDoctor === doc.id) {
-                      setSelectedDoctor("");
-                      setSelectedDoctorName("");
-                    } else {
+        {/* --- NEW SIDE-BY-SIDE GRID --- */}
+        <div className={styles.topGrid}>
+          
+          {/* 1. DOCTOR SELECTION CARD */}
+          <section className={styles.dashboardCard}>
+            <h3>👨‍⚕️ Choose Specialist</h3>
+            <div className={styles.doctorListContainer}>
+              <div className={styles.doctorDropdown}>
+                {doctors.map((doc, idx) => (
+                  <div
+                    key={idx}
+                    className={`${styles.doctorOption} ${
+                      selectedDoctor === doc.id ? styles.activeDoctorOption : ""
+                    }`}
+                    onClick={() => {
                       setSelectedDoctor(doc.id);
                       setSelectedDoctorName(doc.fullName);
-                    }
-                  }}
-                >
-                  <h4>Dr. {doc.fullName}</h4>
+                    }}
+                  >
+                    {/* IMAGE (Clickable for details) */}
+                    <div
+                      className={styles.doctorImageWrapper}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevents selecting when just viewing details
+                        Swal.fire({
+                          title: `Dr. ${doc.fullName}`,
+                          html: `
+                            <p><b>Speciality:</b> ${doc.speciality || "Hair Specialist"}</p>
+                            <p><b>Contact:</b> ${doc.contactNumber || "Not Added"}</p>
+                            <p><b>Available Days:</b> ${doc.weeklySchedule?.join(", ") || "No Schedule"}</p>
+                          `,
+                          imageUrl: doc.profileImage ? `http://localhost:8000${doc.profileImage}` : "",
+                          imageWidth: 120,
+                          confirmButtonColor: "#2563eb",
+                        });
+                      }}
+                    >
+                      {doc.profileImage ? (
+                        <img
+                          src={`http://localhost:8000${doc.profileImage}`}
+                          alt={doc.fullName}
+                          className={styles.doctorMiniImage}
+                        />
+                      ) : (
+                        <div className={styles.defaultMiniAvatar}>
+                          {doc.fullName?.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
 
-                  <p>{doc.speciality || "Hair Specialist"}</p>
-                </div>
+                    {/* NAME & SPECIALITY */}
+                    <div className={styles.doctorInfo}>
+                      <h4>Dr. {doc.fullName}</h4>
+                      <p>{doc.speciality || "Hair Specialist"}</p>
+                    </div>
 
-                {/* SELECTED BADGE */}
-                {selectedDoctor === doc.id && (
-                  <div className={styles.selectedBadge}>✓</div>
-                )}
+                    {/* SELECTED BADGE */}
+                    {selectedDoctor === doc.id && (
+                      <div className={styles.selectedBadge}>✓</div>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
-        {/* UPLOAD */}
-        <section className={`${styles.dashboardCard} ${styles.featuredCard}`}>
-          <h3>📸 Upload New Scan</h3>
+            </div>
+          </section>
 
-          <div
-            className={styles.uploadZone}
-            onClick={() =>
-              !loading && document.getElementById("fileUpload").click()
-            }
-          >
-            <span className={styles.uploadIconLarge}>
-              {loading ? "⏳" : "📤"}
-            </span>
+          {/* 2. UPLOAD CARD */}
+          <section className={`${styles.dashboardCard} ${selectedDoctor ? styles.featuredCard : ''}`}>
+            <h3>📸 Upload New Scan</h3>
+            
+            {/* The Upload Zone now locks and grays out if no doctor is selected */}
+            <div
+              className={`${styles.uploadZone} ${!selectedDoctor ? styles.uploadZoneDisabled : ''}`}
+              onClick={() => {
+                if (!selectedDoctor || loading) return;
+                document.getElementById("fileUpload").click();
+              }}
+            >
+              <span className={styles.uploadIconLarge}>
+                {!selectedDoctor ? "🔒" : loading ? "⏳" : "📤"}
+              </span>
 
-            <p>
-              {loading
-                ? "Uploading..."
-                : selectedDoctor
-                  ? `Send Scan To Dr. ${selectedDoctorName}`
-                  : "Select Doctor First"}
-            </p>
+              <p>
+                {!selectedDoctor 
+                  ? "Select a doctor first to unlock upload" 
+                  : loading 
+                    ? "Uploading..." 
+                    : `Send Scan To Dr. ${selectedDoctorName}`}
+              </p>
 
-            <input
-              type="file"
-              id="fileUpload"
-              hidden
-              accept=".jpg,.jpeg,.png"
-              onChange={handleUpload}
-            />
-          </div>
-        </section>
+              <input
+                type="file"
+                id="fileUpload"
+                hidden
+                accept=".jpg,.jpeg,.png"
+                onChange={handleUpload}
+                disabled={!selectedDoctor || loading}
+              />
+            </div>
+          </section>
+        </div>
 
-        {/* HISTORY */}
+        {/* HISTORY SECTION (Full Width Below) */}
         <section className={styles.gallerySection}>
           <h2 className={styles.sectionTitle}>My Scan History</h2>
 
@@ -307,22 +259,11 @@ export default function PatientDashboard() {
                     alt="Scan"
                     className={styles.scanImage}
                   />
-
                   <div className={styles.scanDetails}>
-                    <p>
-                      <strong>Dr. {s.doctorName}</strong>
-                    </p>
-
-                    <span
-                      className={
-                        s.status === "Processed"
-                          ? styles.statusProcessed
-                          : styles.statusPending
-                      }
-                    >
+                    <p><strong>Dr. {s.doctorName}</strong></p>
+                    <span className={s.status === "Processed" ? styles.statusProcessed : styles.statusPending}>
                       {s.status}
                     </span>
-
                     {s.status === "Processed" && (
                       <button
                         onClick={() => handleDownloadForScan(s.id)}
