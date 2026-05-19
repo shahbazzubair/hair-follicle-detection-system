@@ -1,7 +1,5 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
-
-import ScrollToTop from "./components/ScrollToTop";
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Outlet, useLocation } from "react-router-dom";
 
 // --- Layout Components ---
 import Navbar from "./components/Navbar/Navbar";
@@ -29,6 +27,18 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 
+// --- NEW: Internal Scroll Helper ---
+// We define it right here in App.jsx to avoid needing a separate file!
+const ScrollToTopHelper = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
+
 // --- ENHANCED: Main Layout Wrapper ---
 // Keeps the Navbar and Footer logic completely separate from the routing tree
 const MainLayout = () => {
@@ -48,7 +58,7 @@ export default function App() {
   return (
     <Router>
       {/* AUTO SCROLL TO TOP */}
-      <ScrollToTop />
+      <ScrollToTopHelper />
 
       <Routes>
         {/* === PORTALS & DASHBOARDS (No Navbar/Footer) === */}

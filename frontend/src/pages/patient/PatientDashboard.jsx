@@ -110,6 +110,10 @@ export default function PatientDashboard() {
     navigate("/login", { replace: true });
   };
 
+  // Get the most recent scan to display in the 3rd box
+  const sortedScans = [...myScans].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const recentScan = sortedScans.length > 0 ? sortedScans[0] : null;
+
   return (
     <div className={styles.dashboardWrapper}>
       {/* HEADER */}
@@ -142,10 +146,10 @@ export default function PatientDashboard() {
           <p>Upload scalp scans and select your preferred doctor.</p>
         </div>
 
-        {/* --- NEW SIDE-BY-SIDE GRID --- */}
+        {/* --- 3-COLUMN GRID --- */}
         <div className={styles.topGrid}>
           
-          {/* 1. DOCTOR SELECTION CARD */}
+          {/* BOX 1: DOCTOR SELECTION */}
           <section className={styles.dashboardCard}>
             <h3>👨‍⚕️ Choose Specialist</h3>
             <div className={styles.doctorListContainer}>
@@ -161,11 +165,10 @@ export default function PatientDashboard() {
                       setSelectedDoctorName(doc.fullName);
                     }}
                   >
-                    {/* IMAGE (Clickable for details) */}
                     <div
                       className={styles.doctorImageWrapper}
                       onClick={(e) => {
-                        e.stopPropagation(); // Prevents selecting when just viewing details
+                        e.stopPropagation();
                         Swal.fire({
                           title: `Dr. ${doc.fullName}`,
                           html: `
@@ -192,13 +195,11 @@ export default function PatientDashboard() {
                       )}
                     </div>
 
-                    {/* NAME & SPECIALITY */}
                     <div className={styles.doctorInfo}>
                       <h4>Dr. {doc.fullName}</h4>
                       <p>{doc.speciality || "Hair Specialist"}</p>
                     </div>
 
-                    {/* SELECTED BADGE */}
                     {selectedDoctor === doc.id && (
                       <div className={styles.selectedBadge}>✓</div>
                     )}
@@ -208,11 +209,9 @@ export default function PatientDashboard() {
             </div>
           </section>
 
-          {/* 2. UPLOAD CARD */}
+          {/* BOX 2: UPLOAD */}
           <section className={`${styles.dashboardCard} ${selectedDoctor ? styles.featuredCard : ''}`}>
             <h3>📸 Upload New Scan</h3>
-            
-            {/* The Upload Zone now locks and grays out if no doctor is selected */}
             <div
               className={`${styles.uploadZone} ${!selectedDoctor ? styles.uploadZoneDisabled : ''}`}
               onClick={() => {
@@ -226,10 +225,10 @@ export default function PatientDashboard() {
 
               <p>
                 {!selectedDoctor 
-                  ? "Select a doctor first to unlock upload" 
+                  ? "Select a doctor first to unlock" 
                   : loading 
                     ? "Uploading..." 
-                    : `Send Scan To Dr. ${selectedDoctorName}`}
+                    : `Send to Dr. ${selectedDoctorName}`}
               </p>
 
               <input
@@ -242,9 +241,36 @@ export default function PatientDashboard() {
               />
             </div>
           </section>
+
+          {/* BOX 3: RECENT SCAN */}
+          <section className={styles.dashboardCard}>
+            <h3>⏱️ Recent Scan</h3>
+            {dataLoading ? (
+              <div className={styles.emptyRecent}>Loading...</div>
+            ) : recentScan ? (
+              <div className={styles.recentScanWrapper}>
+                <img
+                  src={`http://localhost:8000${recentScan.imagePath}`}
+                  alt="Recent Scan"
+                  className={styles.recentScanImg}
+                />
+                <div className={styles.recentScanInfo}>
+                  <p><strong>Dr. {recentScan.doctorName}</strong></p>
+                  <span className={recentScan.status === "Processed" ? styles.statusProcessed : styles.statusPending}>
+                    {recentScan.status}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className={styles.emptyRecent}>
+                <p>No recent scans available.</p>
+              </div>
+            )}
+          </section>
+
         </div>
 
-        {/* HISTORY SECTION (Full Width Below) */}
+        {/* HISTORY SECTION */}
         <section className={styles.gallerySection}>
           <h2 className={styles.sectionTitle}>My Scan History</h2>
 
