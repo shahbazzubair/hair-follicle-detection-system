@@ -1,18 +1,18 @@
-from fastapi import APIRouter, HTTPException, Body, UploadFile, File, Form
-from pydantic import BaseModel
-from app.core.database import user_collection
 import os
-import shutil
 import re
+import shutil
 import secrets
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+from fastapi import APIRouter, HTTPException, Body, UploadFile, File, Form
+from pydantic import BaseModel
 from dotenv import load_dotenv
 
-# Load the .env file variables
-load_dotenv()
+from app.core.database import user_collection
 
+load_dotenv()
 router = APIRouter()
 
 # --- SECURITY POLICY ---
@@ -33,7 +33,37 @@ class PatientSignupSchema(BaseModel):
     phone: str
     password: str
 
-# --- 1. PATIENT SIGNUP ---
+# --- HELPER FUNCTION: SEND RESET EMAIL ---
+def send_reset_email(to_email: str, reset_token: str):
+    sender_email = os.getenv("MAIL_USERNAME")
+    sender_password = os.getenv("MAIL_PASSWORD")
+    smtp_server = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+    smtp_port = int(os.getenv("MAIL_PORT", 587))
+
+    if not sender_email or not sender_password:
+        raise HTTPException(status_code=500, detail="Server email configuration is missing or invalid.")
+
+    reset_link = f"http://localhost:5173/reset-password/{reset_token}"
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = to_email
+    msg['Subject'] = "HFD AI Portal - Password Reset"
+    
+    body = f"Hello,\n\nYou requested a password reset. Click the link below to securely set a new password:\n\n{reset_link}\n\nIf you did not request this, please ignore this email."
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+        server.quit()
+    except Exception as e:
+        print(f"Email Error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
+
+# --- ROUTES ---
+
 @router.post("/signup/patient")
 async def signup_patient(data: PatientSignupSchema):
     validate_password_strength(data.password)
@@ -53,7 +83,6 @@ async def signup_patient(data: PatientSignupSchema):
     await user_collection.insert_one(patient_dict)
     return {"status": "success", "message": "Patient registered successfully"}
 
-# --- 2. DOCTOR SIGNUP (With File Upload) ---
 @router.post("/signup/doctor")
 async def signup_doctor(
     fullName: str = Form(...),
@@ -69,7 +98,6 @@ async def signup_doctor(
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    # Handle File Storage
     upload_dir = "static/uploads/degrees"
     os.makedirs(upload_dir, exist_ok=True)
     file_name = f"{email.replace('@', '_')}_{degree.filename}"
@@ -91,7 +119,6 @@ async def signup_doctor(
     await user_collection.insert_one(doctor_dict)
     return {"status": "success", "message": "Doctor registered. Awaiting Admin approval."}
 
-# --- 3. LOGIN ---
 @router.post("/login")
 async def login_user(credentials: LoginSchema):
     user = await user_collection.find_one({"email": credentials.email})
@@ -108,59 +135,31 @@ async def login_user(credentials: LoginSchema):
         "fullName": user.get("fullName")
     }
 
-# --- 4. REAL FORGOT PASSWORD ---
 @router.post("/forgot-password")
 async def forgot_password(request: dict = Body(...)):
     email = request.get("email")
+    if not email:
+        raise HTTPException(status_code=400, detail="Email field is required.")
+
     user = await user_collection.find_one({"email": email})
     if not user:
         raise HTTPException(status_code=404, detail="Email not registered.")
     
-    # Fetch credentials matching your exact .env variable names
-    sender_email = os.getenv("MAIL_USERNAME")
-    sender_password = os.getenv("MAIL_PASSWORD")
-    smtp_server = os.getenv("MAIL_SERVER", "smtp.gmail.com")
-    smtp_port = int(os.getenv("MAIL_PORT", 587))
-
-    # Safety check so the server doesn't crash if .env is missing
-    if not sender_email or not sender_password:
-        raise HTTPException(status_code=500, detail="Server email configuration is missing or invalid.")
-    
-    # 1. Generate token
     reset_token = secrets.token_urlsafe(32)
-    
-    # 2. Save token
     await user_collection.update_one(
         {"email": email}, 
         {"$set": {"reset_token": reset_token}}
     )
     
-    # 3. Prepare Email
-    reset_link = f"http://localhost:5173/reset-password/{reset_token}"
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = email
-    msg['Subject'] = "HFD AI Portal - Password Reset"
-    body = f"Hello,\n\nYou requested a password reset. Click the link below to securely set a new password:\n\n{reset_link}\n\nIf you did not request this, please ignore this email."
-    msg.attach(MIMEText(body, 'plain'))
-    
-    # 4. Send Email
-    try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.send_message(msg)
-        server.quit()
-    except Exception as e:
-        print(f"Email Error: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
-        
+    send_reset_email(email, reset_token)
     return {"status": "success", "message": "Reset link sent successfully."}
 
-# --- 5. REAL RESET PASSWORD ---
 @router.post("/reset-password/{token}")
 async def reset_password(token: str, data: dict = Body(...)):
     new_password = data.get("password")
+    if not new_password:
+        raise HTTPException(status_code=400, detail="Password field is required.")
+
     validate_password_strength(new_password)
     
     user = await user_collection.find_one({"reset_token": token})
@@ -174,5 +173,4 @@ async def reset_password(token: str, data: dict = Body(...)):
             "$unset": {"reset_token": ""} 
         }
     )
-    
     return {"status": "success", "message": "Password updated securely."}
