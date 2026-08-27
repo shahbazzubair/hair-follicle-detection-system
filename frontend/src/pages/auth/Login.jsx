@@ -59,17 +59,36 @@ export default function Login() {
     <div className={styles.authContainer}>
       <div className={styles.authCard}>
         <div className={styles.roleToggle}>
-          <button type="button" className={role === 'patient' ? styles.activeTab : styles.tab} onClick={() => setRole('patient')}>Patient</button>
-          <button type="button" className={role === 'doctor' ? styles.activeTab : styles.tab} onClick={() => setRole('doctor')}>Doctor</button>
+          <button 
+            type="button" 
+            className={role === 'patient' ? styles.activeTab : styles.tab} 
+            onClick={() => { setRole('patient'); setEmail(''); setPassword(''); }}
+          >
+            Patient
+          </button>
+          <button 
+            type="button" 
+            className={role === 'doctor' ? styles.activeTab : styles.tab} 
+            onClick={() => { setRole('doctor'); setEmail(''); setPassword(''); }}
+          >
+            Doctor
+          </button>
         </div>
 
         <h2>{role === 'patient' ? 'Patient Login' : 'Doctor Login'}</h2>
         <p>Please enter your credentials to continue.</p>
         
-        <form className={styles.form} onSubmit={handleLogin}>
+        <form className={styles.form} onSubmit={handleLogin} autoComplete="off">
           <div className={styles.inputGroup}>
             <label>Email Address</label>
-            <input type="email" placeholder="email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input 
+              type="email" 
+              placeholder="email@example.com" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+              autoComplete="off"
+              required 
+            />
           </div>
 
           <div className={styles.inputGroup}>
@@ -77,7 +96,14 @@ export default function Login() {
               <label>Password</label>
               <Link to="/forgot-password" className={styles.forgotLink}>Forgot?</Link>
             </div>
-            <input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input 
+              type="password" 
+              placeholder="••••••••" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              autoComplete="new-password"
+              required 
+            />
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={loading}>

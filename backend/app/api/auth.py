@@ -15,12 +15,31 @@ from app.core.database import user_collection
 load_dotenv()
 router = APIRouter()
 
-# --- SECURITY POLICY ---
+# --- SECURITY & VALIDATION POLICIES ---
 def validate_password_strength(password: str):
     if len(password) < 8:
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
     if not re.search(r"[A-Z]", password) or not re.search(r"[a-z]", password) or not re.search(r"\d", password) or not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
         raise HTTPException(status_code=400, detail="Password does not meet security requirements.")
+
+def validate_pakistan_phone(phone: str):
+    cleaned = re.sub(r"[\s\-]", "", phone)
+    pattern = r"^(?:\+92|0092|92|0)?3[0-9]{9}$"
+    if not re.match(pattern, cleaned):
+        raise HTTPException(
+            status_code=400, 
+            detail="Invalid Pakistani phone number. Please enter a valid mobile number (e.g., 03001234567 or +923001234567)."
+        )
+
+def validate_full_name(name: str):
+    if len(name.strip()) < 3:
+        raise HTTPException(status_code=400, detail="Full Name must be at least 3 characters long.")
+    if not re.match(r"^[a-zA-Z\s.]+$", name.strip()):
+        raise HTTPException(status_code=400, detail="Full Name can only contain letters, spaces, and periods.")
+
+def validate_email_format(email: str):
+    if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email.strip()):
+        raise HTTPException(status_code=400, detail="Please enter a valid email address.")
 
 # --- SCHEMAS ---
 class LoginSchema(BaseModel):
@@ -66,6 +85,9 @@ def send_reset_email(to_email: str, reset_token: str):
 
 @router.post("/signup/patient")
 async def signup_patient(data: PatientSignupSchema):
+    validate_full_name(data.fullName)
+    validate_email_format(data.email)
+    validate_pakistan_phone(data.phone)
     validate_password_strength(data.password)
     
     existing_user = await user_collection.find_one({"email": data.email})
@@ -73,9 +95,9 @@ async def signup_patient(data: PatientSignupSchema):
         raise HTTPException(status_code=400, detail="Email already registered")
     
     patient_dict = {
-        "fullName": data.fullName, 
-        "email": data.email, 
-        "phone": data.phone,
+        "fullName": data.fullName.strip(), 
+        "email": data.email.strip().lower(), 
+        "phone": data.phone.strip(),
         "password": data.password, 
         "role": "patient", 
         "status": "Active"
@@ -92,7 +114,18 @@ async def signup_doctor(
     specialization: str = Form(...),
     degree: UploadFile = File(...)
 ):
+    validate_full_name(fullName)
+    validate_email_format(email)
+    validate_pakistan_phone(phone)
     validate_password_strength(password)
+    
+    if len(specialization.strip()) < 3:
+        raise HTTPException(status_code=400, detail="Specialization must be at least 3 characters long.")
+    
+    allowed_extensions = {".jpg", ".jpeg", ".png", ".pdf"}
+    ext = os.path.splitext(degree.filename)[1].lower()
+    if ext not in allowed_extensions:
+        raise HTTPException(status_code=400, detail="Invalid degree file. Only JPG, PNG, and PDF formats are supported.")
     
     existing_user = await user_collection.find_one({"email": email})
     if existing_user:
@@ -107,11 +140,11 @@ async def signup_doctor(
         shutil.copyfileobj(degree.file, buffer)
     
     doctor_dict = {
-        "fullName": fullName, 
-        "email": email, 
-        "phone": phone, 
-        "password": password,
-        "specialization": specialization, 
+        "fullName": fullName.strip(), 
+        "email": email.strip().lower(), 
+        "phone": phone.strip(), 
+        "password": password, 
+        "specialization": specialization.strip(), 
         "degree_path": f"/{file_path}", 
         "role": "doctor", 
         "status": "Pending" 

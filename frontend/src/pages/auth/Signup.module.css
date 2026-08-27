@@ -23,6 +23,35 @@
 .inputGroup label { font-size: 0.9rem; font-weight: 600; color: #334155; }
 .inputGroup input { padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; outline: none; background: #f8fafc; transition: border 0.2s; }
 .inputGroup input:focus { border-color: #2563eb; background: white; }
+.inputGroup input.inputError { border-color: #ef4444; background: #fffdfd; }
+.inputGroup input.inputSuccess { border-color: #10b981; }
+
+.fieldHint {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.fieldError {
+  font-size: 0.78rem;
+  color: #ef4444;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.matchValid {
+  font-size: 0.8rem;
+  color: #10b981;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.matchInvalid {
+  font-size: 0.8rem;
+  color: #ef4444;
+  font-weight: 500;
+  margin-top: 4px;
+}
 
 .passwordRequirements { margin-top: 5px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem; }
 .valid { color: #10b981; font-weight: 600; }
