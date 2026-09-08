@@ -20,9 +20,18 @@ def send_status_email(to_email: str, doctor_name: str, status: str):
     smtp_server = os.getenv("MAIL_SERVER", "smtp.gmail.com")
     smtp_port = int(os.getenv("MAIL_PORT", 587))
 
+    if not sender_email or not sender_password:
+        print("⚠️ Email credentials (MAIL_USERNAME/MAIL_PASSWORD) not configured in .env. Skipping email notification.")
+        return False
+
+    if not to_email:
+        print("⚠️ No recipient email provided. Skipping email.")
+        return False
+
     if status == "Approved":
         subject = "Doctor Account Approved"
         body = f"""Hello Dr. {doctor_name},
+
 We are pleased to inform you that your registration request for the Hair Follicle Detection AI Portal has been successfully approved by the administration team.
 
 Your account is now active, and you may log in to the platform using your registered credentials.
@@ -58,9 +67,11 @@ Hair Follicle Detection AI Team"""
         server.login(sender_email, sender_password)
         server.send_message(msg)
         server.quit()
+        print(f"✅ Status email successfully sent to {to_email}")
+        return True
     except Exception as e:
-        print("EMAIL ERROR:", e)
-        raise HTTPException(status_code=500, detail=f"Email sending failed: {str(e)}")
+        print(f"⚠️ Email sending failed: {e}. (Database status was updated successfully)")
+        return False
 
 
 # --- ROUTES ---
@@ -94,9 +105,7 @@ async def verify_doctor(user_id: str, data: dict):
     if not doctor:
         raise HTTPException(status_code=404, detail="Doctor not found")
 
-    # Call our clean helper function to handle the email
-    send_status_email(doctor.get("email"), doctor.get("fullName"), status)
-
+    # 1. Update status in database first
     if status == "Approved":
         await user_collection.update_one(
             {"_id": ObjectId(user_id)},
@@ -104,6 +113,9 @@ async def verify_doctor(user_id: str, data: dict):
         )
     elif status == "Rejected":
         await user_collection.delete_one({"_id": ObjectId(user_id)})
+
+    # 2. Attempt to send email notification (fails gracefully without aborting)
+    send_status_email(doctor.get("email"), doctor.get("fullName"), status)
 
     return {"status": "success", "message": f"Doctor {status.lower()} successfully"}
 

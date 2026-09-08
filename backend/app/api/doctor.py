@@ -323,7 +323,8 @@ async def update_profile(data: dict):
 async def get_all_doctors():
 
     doctors_cursor = db["users"].find({
-        "role": "doctor"
+        "role": "doctor",
+        "status": "Approved"
     })
 
     doctors = await doctors_cursor.to_list(length=100)

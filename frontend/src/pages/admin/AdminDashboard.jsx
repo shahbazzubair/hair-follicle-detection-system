@@ -53,7 +53,8 @@ export default function AdminDashboard() {
         Swal.fire("Success!", "Action completed.", "success");
         fetchUsers();
       } catch (err) {
-        Swal.fire("Error", "Action failed.", "error");
+        const detail = err.response?.data?.detail || "Action failed.";
+        Swal.fire("Error", detail, "error");
       }
     }
   };
