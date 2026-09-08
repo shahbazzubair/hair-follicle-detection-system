@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
+import { generateClinicalReportPDF } from "../../utils/reportGenerator";
 import styles from "./PatientDashboard.module.css";
 
 export default function PatientDashboard() {
@@ -58,33 +57,25 @@ export default function PatientDashboard() {
     }
   };
 
-  const downloadPDF = (report) => {
+  const downloadPDF = async (report) => {
     try {
-      const doc = new jsPDF();
-
-      doc.setFont("helvetica", "bold");
-
-      doc.text("HAIR FOLLICLE ANALYSIS REPORT", 105, 20, {
-        align: "center",
+      Swal.fire({
+        title: "Generating Report...",
+        text: "Preparing your clinical analysis PDF...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
       });
 
-      autoTable(doc, {
-        startY: 40,
-
-        head: [["Metric", "Details"]],
-
-        body: [
-          ["Patient Name", userName],
-          ["Doctor", `Dr. ${report.doctorName}`],
-          ["AI Result", report.baldnessStage],
-          ["Clinical Status", "Processed"],
-          ["Date", new Date(report.date).toLocaleDateString()],
-        ],
+      await generateClinicalReportPDF({
+        ...report,
+        patientName: userName || "Patient",
+        doctorName: report.doctorName || "Specialist"
       });
 
-      doc.save(`${userName}_Report.pdf`);
+      Swal.close();
     } catch (err) {
-      Swal.fire("Error", "PDF generation failed.", "error");
+      console.error("PDF Error:", err);
+      Swal.fire("Error", `PDF Generation Failed: ${err?.message || "Please try again"}`, "error");
     }
   };
 

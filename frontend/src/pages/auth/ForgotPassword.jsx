@@ -13,14 +13,30 @@ export default function ForgotPassword() {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('http://localhost:8000/api/auth/forgot-password', { email });
-      Swal.fire('Email Sent!', 'Please check your inbox for the reset link.', 'success');
+      const res = await axios.post('http://localhost:8000/api/auth/forgot-password', { email: email.trim() });
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Email Sent!',
+        text: res.data.message || 'A password reset link has been sent to your email. Please check your inbox.',
+        confirmButtonColor: '#2563eb'
+      });
       setEmail('');
     } catch (err) {
       if (err.response?.status === 404) {
-        Swal.fire({ title: "Not Registered", text: err.response.data.detail, icon: "warning", showCancelButton: true, confirmButtonText: 'Go to Signup' }).then((r) => { if (r.isConfirmed) navigate('/signup'); });
+        Swal.fire({ 
+          title: "Not Registered", 
+          text: err.response.data.detail || "This email is not registered.", 
+          icon: "warning", 
+          showCancelButton: true, 
+          confirmButtonText: 'Go to Signup',
+          confirmButtonColor: '#2563eb'
+        }).then((r) => { 
+          if (r.isConfirmed) navigate('/signup'); 
+        });
       } else {
-        Swal.fire('Error', 'Could not connect to the server.', 'error');
+        const errorDetail = err.response?.data?.detail || "Could not send reset email. Please verify your email configuration.";
+        Swal.fire('Error', errorDetail, 'error');
       }
     } finally {
       setLoading(false);

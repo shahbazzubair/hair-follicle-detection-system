@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
+import { generateClinicalReportPDF } from "../../utils/reportGenerator";
 import styles from "./DoctorDashboard.module.css";
 
 export default function DoctorDashboard() {
@@ -87,41 +86,25 @@ export default function DoctorDashboard() {
       console.error(err);
     }
   };
-  const downloadReport = (data) => {
+  const downloadReport = async (data) => {
     try {
-      const doc = new jsPDF();
-
-      doc.setFont("helvetica", "bold");
-
-      doc.text("HAIR FOLLICLE ANALYSIS REPORT", 105, 20, { align: "center" });
-
-      autoTable(doc, {
-        startY: 35,
-        theme: "grid",
-
-        headStyles: {
-          fillColor: [15, 23, 42],
-        },
-
-        head: [["Metric", "Details"]],
-
-        body: [
-          ["Patient Name", data.patientName],
-          ["Assigned Doctor", `Dr. ${doctorName}`],
-          ["AI Analysis Result", data.baldnessStage],
-          ["Clinical Status", "Verified & Processed"],
-          [
-            "Report Date",
-            new Date(data.date || Date.now()).toLocaleDateString(),
-          ],
-        ],
+      Swal.fire({
+        title: "Generating Report...",
+        text: "Preparing high-resolution clinical analysis PDF...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
       });
 
-      doc.save(`${data.patientName}_Clinical_Report.pdf`);
+      await generateClinicalReportPDF({
+        ...data,
+        doctorName: doctorName || "Specialist",
+        assignedDoctor: doctorName
+      });
+
+      Swal.close();
     } catch (err) {
       console.error("PDF Error:", err);
-
-      Swal.fire("Error", "PDF Generation Failed.", "error");
+      Swal.fire("Error", `PDF Generation Failed: ${err?.message || "Please try again"}`, "error");
     }
   };
   const saveProfile = async () => {

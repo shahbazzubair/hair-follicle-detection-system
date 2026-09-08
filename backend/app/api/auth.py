@@ -60,23 +60,75 @@ def send_reset_email(to_email: str, reset_token: str):
     smtp_port = int(os.getenv("MAIL_PORT", 587))
 
     if not sender_email or not sender_password:
-        raise HTTPException(status_code=500, detail="Server email configuration is missing or invalid.")
+        raise HTTPException(
+            status_code=500, 
+            detail="Email service not configured. Please set MAIL_USERNAME and MAIL_PASSWORD in backend/.env"
+        )
 
     reset_link = f"http://localhost:5173/reset-password/{reset_token}"
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
+    msg = MIMEMultipart("alternative")
+    msg['From'] = f"Hair Follicle Detection Portal <{sender_email}>"
     msg['To'] = to_email
-    msg['Subject'] = "HFD AI Portal - Password Reset"
+    msg['Subject'] = "Password Reset Request - Hair Follicle Detection Portal"
     
-    body = f"Hello,\n\nYou requested a password reset. Click the link below to securely set a new password:\n\n{reset_link}\n\nIf you did not request this, please ignore this email."
-    msg.attach(MIMEText(body, 'plain'))
+    text_body = f"""Hello,
+
+You requested a password reset for your account on the Hair Follicle Detection AI Portal.
+
+Click the link below to set a new password:
+{reset_link}
+
+If you did not request a password reset, you can safely ignore this email.
+
+Best Regards,
+Hair Follicle Detection AI Team"""
+
+    html_body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body {{ font-family: Arial, sans-serif; background-color: #f8fafc; color: #1e293b; padding: 20px; }}
+        .card {{ background-color: #ffffff; max-width: 520px; margin: 0 auto; border-radius: 12px; padding: 32px; border: 1px solid #e2e8f0; }}
+        .btn {{ display: inline-block; background-color: #0284c7; color: #ffffff !important; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; margin: 20px 0; }}
+        .footer {{ font-size: 12px; color: #64748b; margin-top: 24px; border-top: 1px solid #f1f5f9; padding-top: 12px; }}
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <h2 style="color: #0f172a; margin-top: 0;">Password Reset Request</h2>
+        <p>Hello,</p>
+        <p>You requested a password reset for your account on the <strong>Hair Follicle Detection AI Portal</strong>.</p>
+        <p>Click the button below to securely create a new password:</p>
+        <p style="text-align: center;">
+          <a href="{reset_link}" class="btn">Reset Password</a>
+        </p>
+        <p style="font-size: 13px; color: #64748b;">Or copy and paste this link into your browser:<br><a href="{reset_link}">{reset_link}</a></p>
+        <div class="footer">
+          If you did not make this request, please ignore this email. Your account remains secure.
+        </div>
+      </div>
+    </body>
+    </html>
+    """
+
+    msg.attach(MIMEText(text_body, 'plain'))
+    msg.attach(MIMEText(html_body, 'html'))
 
     try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
+        server = smtplib.SMTP(smtp_server, smtp_port, timeout=15)
         server.starttls()
         server.login(sender_email, sender_password)
         server.send_message(msg)
         server.quit()
+        print(f"✅ Reset email successfully sent to {to_email}")
+        return True
+    except smtplib.SMTPAuthenticationError:
+        raise HTTPException(
+            status_code=500,
+            detail="SMTP Authentication Failed. Please check your MAIL_USERNAME and MAIL_PASSWORD (use an App Password)."
+        )
     except Exception as e:
         print(f"Email Error: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
@@ -174,18 +226,23 @@ async def forgot_password(request: dict = Body(...)):
     if not email:
         raise HTTPException(status_code=400, detail="Email field is required.")
 
-    user = await user_collection.find_one({"email": email})
+    clean_email = email.strip().lower()
+    user = await user_collection.find_one({"email": clean_email})
     if not user:
-        raise HTTPException(status_code=404, detail="Email not registered.")
+        raise HTTPException(status_code=404, detail="This email is not registered in our system.")
     
     reset_token = secrets.token_urlsafe(32)
     await user_collection.update_one(
-        {"email": email}, 
+        {"email": clean_email}, 
         {"$set": {"reset_token": reset_token}}
     )
     
-    send_reset_email(email, reset_token)
-    return {"status": "success", "message": "Reset link sent successfully."}
+    send_reset_email(clean_email, reset_token)
+    
+    return {
+        "status": "success", 
+        "message": "A password reset link has been sent to your email address. Please check your inbox."
+    }
 
 @router.post("/reset-password/{token}")
 async def reset_password(token: str, data: dict = Body(...)):
