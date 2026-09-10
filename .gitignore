@@ -217,3 +217,9 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 backend/static/uploads/
+
+# Large Model Weights (Keep on local disk & Drive)
+*.safetensors
+*.bin
+*.pt
+*.pth

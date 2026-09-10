@@ -72,19 +72,23 @@ const loadImageBase64 = (url) => {
 const getClinicalInsights = (stageStr = "") => {
   const s = stageStr.toLowerCase();
   
+  // 4 Core General Important Precautions to Prevent Hair Fall
+  const basePrecautions = [
+    "Scalp Hygiene & Barrier Care: Wash with lukewarm water and mild, sulfate-free cleansers; avoid hot water and aggressive scratching.",
+    "Nutritional & Micronutrient Support: Maintain adequate dietary intake of lean proteins, Iron (Ferritin), Zinc, Omega-3, and Vitamins D3 & Biotin.",
+    "Minimize Mechanical Stress & Traction: Avoid tight hairstyles (braids, tight ponytails), harsh towel rubbing on wet hair, and heat styling (>180°C).",
+    "Chemical & UV Protection: Minimize frequent bleaching and chemical dyes; protect scalp from excessive direct UV sun exposure."
+  ];
+
   if (s.includes("stage 1") || s.includes("normal")) {
     return {
       severity: "Normal / Healthy Baseline",
       density: "215 follicles / cm²",
-      densityStatus: "Optimal",
+      densityStatus: "Optimal Density",
       vellusRatio: "8 : 1 (Normal)",
-      anagenPercent: "88% (Growth Phase)",
+      anagenPercent: "88% (Active Growth)",
       riskLevel: "Low / Preventive",
-      recommendations: [
-        "Maintain routine scalp hygiene with pH-balanced therapeutic cleanser.",
-        "Routine annual trichoscopy check-up to monitor baseline hair density.",
-        "Maintain balanced dietary intake rich in Biotin, Zinc, and Vitamin D3."
-      ]
+      precautions: basePrecautions
     };
   } else if (s.includes("stage 2")) {
     return {
@@ -94,25 +98,17 @@ const getClinicalInsights = (stageStr = "") => {
       vellusRatio: "4.5 : 1 (Early Miniaturization)",
       anagenPercent: "82% (Growth Phase)",
       riskLevel: "Mild / Early Stage",
-      recommendations: [
-        "Initiate Topical Minoxidil 5% solution (1 ml twice daily on affected zones).",
-        "Consider Ketoconazole 2% therapeutic shampoo twice weekly.",
-        "Schedule follow-up digital trichoscopy scan in 90 days to track stabilization."
-      ]
+      precautions: basePrecautions
     };
   } else if (s.includes("stage 3")) {
     return {
-      severity: "Moderate Androgenetic Alopecia (Stage III)",
+      severity: "Moderate Frontal & Vertex Recession (Stage III)",
       density: "155 follicles / cm²",
       densityStatus: "Moderate Miniaturization",
       vellusRatio: "3 : 1 (Miniaturization Present)",
       anagenPercent: "76% (Shortened Cycle)",
       riskLevel: "Moderate",
-      recommendations: [
-        "Topical Minoxidil 5% combined with Clinical Consultation for 5-Alpha Reductase inhibitors.",
-        "Evaluate suitability for Low-Level Laser Therapy (LLLT) or Platelet-Rich Plasma (PRP) sessions.",
-        "Re-evaluate follicular density and anagen/telogen ratio after 3-6 months."
-      ]
+      precautions: basePrecautions
     };
   } else if (s.includes("stage 4") || s.includes("stage 5")) {
     return {
@@ -122,11 +118,7 @@ const getClinicalInsights = (stageStr = "") => {
       vellusRatio: "2 : 1 (Marked Miniaturization)",
       anagenPercent: "68% (Reduced)",
       riskLevel: "High / Progressive",
-      recommendations: [
-        "Comprehensive dual medical therapy protocol under direct trichologist supervision.",
-        "Consider adjuvant regenerative therapy (PRP / Mesotherapy) to stimulate dormant follicles.",
-        "Clinical evaluation for surgical restoration / FUE follicular grafting feasibility."
-      ]
+      precautions: basePrecautions
     };
   } else {
     return {
@@ -136,11 +128,7 @@ const getClinicalInsights = (stageStr = "") => {
       vellusRatio: "1.2 : 1 (Predominantly Vellus)",
       anagenPercent: "55% (Telogen Dominant)",
       riskLevel: "Advanced",
-      recommendations: [
-        "Consultation with Hair Restoration Surgeon for surgical transplantation (FUE/FUT).",
-        "Maintain existing donor zone follicles with supportive topical and oral therapy.",
-        "Lifestyle & scalp barrier protection protocol to prevent further degradation."
-      ]
+      precautions: basePrecautions
     };
   }
 };
@@ -171,44 +159,44 @@ export const generateClinicalReportPDF = async (reportData = {}) => {
 
   // 1. HEADER SECTION (Navy Gradient Style)
   doc.setFillColor(15, 23, 42); // #0f172a
-  doc.rect(0, 0, pageWidth, 28, "F");
+  doc.rect(0, 0, pageWidth, 26, "F");
 
   // Accent Teal Top Bar
   doc.setFillColor(2, 132, 199); // #0284c7
-  doc.rect(0, 28, pageWidth, 2.5, "F");
+  doc.rect(0, 26, pageWidth, 2.5, "F");
 
   // System Title & Subtitle
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(15);
+  doc.setFontSize(14);
   doc.setTextColor(255, 255, 255);
-  doc.text("HAIR FOLLICLE DETECTION SYSTEM", margin, 12);
+  doc.text("HAIR FOLLICLE DETECTION SYSTEM", margin, 11);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setTextColor(148, 163, 184); // #94a3b8
-  doc.text("AI Computer Vision Diagnostic & Follicular Health Laboratory", margin, 18);
+  doc.text("AI Computer Vision Diagnostic & Follicular Health Laboratory", margin, 17);
 
   // Header Barcode
   const barcodeImg = generateBarcode(barcodeId);
   if (barcodeImg) {
     try {
-      doc.addImage(barcodeImg, "PNG", pageWidth - margin - 45, 6, 45, 12);
-      doc.setFontSize(7.5);
+      doc.addImage(barcodeImg, "PNG", pageWidth - margin - 42, 5, 42, 11);
+      doc.setFontSize(7);
       doc.setTextColor(203, 213, 225);
-      doc.text(barcodeId, pageWidth - margin - 22.5, 22, { align: "center" });
+      doc.text(barcodeId, pageWidth - margin - 21, 20, { align: "center" });
     } catch (e) {
       console.warn("Barcode rendering skipped:", e);
     }
   }
 
-  // 2. PATIENT & PHYSICIAN INFORMATION SECTION (Dual Card Layout)
-  const infoStartY = 36;
+  // 2. PATIENT & PHYSICIAN INFORMATION SECTION
+  const infoStartY = 33;
   
   autoTable(doc, {
     startY: infoStartY,
     theme: "plain",
     margin: { left: margin, right: margin },
-    styles: { cellPadding: 3, fontSize: 8.5, textColor: [51, 65, 85] },
+    styles: { cellPadding: 2.2, fontSize: 8.2, textColor: [51, 65, 85] },
     columnStyles: {
       0: { fontStyle: "bold", textColor: [15, 23, 42], cellWidth: 32 },
       1: { cellWidth: 58 },
@@ -218,30 +206,30 @@ export const generateClinicalReportPDF = async (reportData = {}) => {
     body: [
       ["Patient Name:", patientName, "Consulting Doctor:", `Dr. ${doctorName}`],
       ["Patient ID:", `PT-${reportId.slice(-5)}`, "Specialization:", "Hair Restoration"],
-      ["Report Date:", reportDate.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }), "Diagnostic Engine:", "Deep CNN AI Model v2.4"],
+      ["Report Date:", reportDate.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }), "Diagnostic Engine:", "Vision Transformer (ViT) v2.0"],
       ["Clinical Status:", "Verified & Processed", "Verification:", "Digitally Signed & Validated"]
     ]
   });
 
-  let currentY = (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY + 4 : infoStartY + 35;
+  let currentY = (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY + 3 : infoStartY + 30;
 
   // Horizontal Accent Divider
   doc.setDrawColor(226, 232, 240); // #e2e8f0
   doc.setLineWidth(0.5);
   doc.line(margin, currentY, pageWidth - margin, currentY);
 
-  currentY += 6;
+  currentY += 4.5;
 
   // 3. SCAN IMAGE & PRIMARY AI FINDINGS (SIDE BY SIDE)
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.setTextColor(15, 23, 42);
   doc.text("1. MICROSCOPIC TRICHOSCOPY & PRIMARY DIAGNOSIS", margin, currentY);
-  currentY += 4;
+  currentY += 3.5;
 
-  const cardHeight = 48;
-  const imageWidth = 52;
-  const imageHeight = 42;
+  const cardHeight = 44;
+  const imageWidth = 50;
+  const imageHeight = 38;
 
   // Left Side: Image Container Box
   doc.setDrawColor(203, 213, 225);
@@ -273,44 +261,44 @@ export const generateClinicalReportPDF = async (reportData = {}) => {
   doc.roundedRect(summaryX, currentY, summaryWidth, cardHeight, 3, 3, "FD");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.5);
+  doc.setFontSize(9);
   doc.setTextColor(2, 132, 199);
-  doc.text("AI DIAGNOSTIC CLASSIFICATION", summaryX + 6, currentY + 7);
+  doc.text("AI DIAGNOSTIC CLASSIFICATION", summaryX + 6, currentY + 6.5);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
+  doc.setFontSize(13);
   doc.setTextColor(15, 23, 42);
-  doc.text(rawStage, summaryX + 6, currentY + 16);
+  doc.text(rawStage, summaryX + 6, currentY + 15);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.5);
+  doc.setFontSize(8);
   doc.setTextColor(71, 85, 105);
-  doc.text(`Severity Assessment: `, summaryX + 6, currentY + 23);
+  doc.text(`Severity Assessment: `, summaryX + 6, currentY + 22);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(15, 23, 42);
-  doc.text(insights.severity, summaryX + 38, currentY + 23);
+  doc.text(insights.severity, summaryX + 38, currentY + 22);
 
   doc.setFont("helvetica", "normal");
   doc.setTextColor(71, 85, 105);
-  doc.text(`Clinical Risk Level: `, summaryX + 6, currentY + 30);
+  doc.text(`Clinical Risk Level: `, summaryX + 6, currentY + 29);
   doc.setFont("helvetica", "bold");
   if (insights.riskLevel.includes("Low")) {
     doc.setTextColor(22, 163, 74); // Green
   } else {
     doc.setTextColor(217, 119, 6); // Amber / Orange
   }
-  doc.text(insights.riskLevel, summaryX + 35, currentY + 30);
+  doc.text(insights.riskLevel, summaryX + 35, currentY + 29);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(100, 116, 139);
-  doc.text("Inference computed via High-Density Convolutional Feature Mapping.", summaryX + 6, currentY + 41);
+  doc.text("Inference computed via Vision Transformer (ViT) Patch Self-Attention.", summaryX + 6, currentY + 38);
 
-  currentY += cardHeight + 8;
+  currentY += cardHeight + 6;
 
   // 4. QUANTITATIVE TRICHOSCOPY ANALYSIS TABLE
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.setTextColor(15, 23, 42);
   doc.text("2. QUANTITATIVE FOLLICULAR METRICS & PARAMETERS", margin, currentY);
   currentY += 2;
@@ -323,13 +311,13 @@ export const generateClinicalReportPDF = async (reportData = {}) => {
       fillColor: [15, 23, 42],
       textColor: [255, 255, 255],
       fontStyle: "bold",
-      fontSize: 8.5,
+      fontSize: 8,
       halign: "left"
     },
     bodyStyles: {
-      fontSize: 8,
+      fontSize: 7.5,
       textColor: [51, 65, 85],
-      cellPadding: 2.8
+      cellPadding: 2.2
     },
     columnStyles: {
       0: { fontStyle: "bold", cellWidth: 50 },
@@ -347,40 +335,40 @@ export const generateClinicalReportPDF = async (reportData = {}) => {
     ]
   });
 
-  currentY = doc.lastAutoTable.finalY + 7;
+  currentY = doc.lastAutoTable.finalY + 5;
 
-  // 5. CLINICAL IMPRESSION & RECOMMENDATIONS SECTION
+  // 5. GENERAL PRECAUTIONS & CLINICAL GUIDELINES SECTION
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.setTextColor(15, 23, 42);
-  doc.text("3. CLINICAL IMPRESSION & TREATMENT RECOMMENDATIONS", margin, currentY);
-  currentY += 3;
+  doc.text("3. GENERAL PRECAUTIONS & CLINICAL GUIDELINES TO PREVENT HAIR FALL", margin, currentY);
+  currentY += 2.5;
 
+  const precautionsList = insights.precautions || [];
+  const contentWidth = pageWidth - margin * 2;
+  const maxTextWidth = contentWidth - 14;
+
+  const recBoxHeight = 31;
   doc.setDrawColor(226, 232, 240);
   doc.setFillColor(248, 250, 252);
-  const recBoxHeight = 34;
-  doc.roundedRect(margin, currentY, pageWidth - margin * 2, recBoxHeight, 2.5, 2.5, "FD");
+  doc.roundedRect(margin, currentY, contentWidth, recBoxHeight, 2.5, 2.5, "FD");
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.2);
-  doc.setTextColor(51, 65, 85);
-
-  let recY = currentY + 6;
-  insights.recommendations.forEach((rec, idx) => {
+  let recY = currentY + 5;
+  doc.setFontSize(7.5);
+  precautionsList.forEach((item, idx) => {
     doc.setFont("helvetica", "bold");
     doc.setTextColor(2, 132, 199);
-    doc.text(`[${idx + 1}]`, margin + 5, recY);
-    
+    doc.text(`[${idx + 1}]`, margin + 4, recY);
+
     doc.setFont("helvetica", "normal");
     doc.setTextColor(51, 65, 85);
-    doc.text(rec, margin + 12, recY);
-    recY += 7.5;
+    const splitLines = doc.splitTextToSize(item, maxTextWidth);
+    doc.text(splitLines, margin + 11, recY);
+    recY += 6.5;
   });
 
-  currentY += recBoxHeight + 8;
-
   // 6. VERIFICATION SIGNATURE & DIGITAL SEAL FOOTER
-  const footerY = pageHeight - 28;
+  const footerY = pageHeight - 25;
 
   doc.setDrawColor(226, 232, 240);
   doc.setLineWidth(0.5);
@@ -388,38 +376,38 @@ export const generateClinicalReportPDF = async (reportData = {}) => {
 
   // Left Footer Info
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(7.8);
   doc.setTextColor(15, 23, 42);
   doc.text("Electronic Clinical Verification", margin, footerY);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
+  doc.setFontSize(6.8);
   doc.setTextColor(100, 116, 139);
-  doc.text("Report generated by Hair Follicle Detection AI Diagnostic Platform.", margin, footerY + 4);
-  doc.text("For medical inquiries or consultation, contact clinic department.", margin, footerY + 8);
+  doc.text("Report generated by Hair Follicle Detection AI Diagnostic Platform.", margin, footerY + 3.8);
+  doc.text("For medical inquiries or consultation, contact clinic department.", margin, footerY + 7.6);
 
   // Right Footer Signature Line
   const sigX = pageWidth - margin - 55;
   doc.setDrawColor(71, 85, 105);
   doc.setLineWidth(0.4);
-  doc.line(sigX, footerY + 2, sigX + 55, footerY + 2);
+  doc.line(sigX, footerY + 1, sigX + 55, footerY + 1);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(7.8);
   doc.setTextColor(15, 23, 42);
-  doc.text(`Dr. ${doctorName}`, sigX + 27.5, footerY + 6, { align: "center" });
+  doc.text(`Dr. ${doctorName}`, sigX + 27.5, footerY + 5, { align: "center" });
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
+  doc.setFontSize(6.8);
   doc.setTextColor(100, 116, 139);
-  doc.text("Authorized Medical Specialist", sigX + 27.5, footerY + 10, { align: "center" });
+  doc.text("Authorized Medical Specialist", sigX + 27.5, footerY + 8.8, { align: "center" });
 
   // Bottom Disclaimer Bar
   doc.setFillColor(241, 245, 249);
-  doc.rect(0, pageHeight - 6, pageWidth, 6, "F");
-  doc.setFontSize(6.5);
+  doc.rect(0, pageHeight - 5, pageWidth, 5, "F");
+  doc.setFontSize(6);
   doc.setTextColor(148, 163, 184);
-  doc.text("CONFIDENTIAL MEDICAL RECORD - This report is issued for clinical diagnostic support. (Page 1 of 1)", pageWidth / 2, pageHeight - 2, { align: "center" });
+  doc.text("CONFIDENTIAL MEDICAL RECORD - This report is issued for clinical diagnostic support. (Page 1 of 1)", pageWidth / 2, pageHeight - 1.5, { align: "center" });
 
   // SAVE FILE
   const safeName = patientName.replace(/[^a-zA-Z0-9_-]/g, "_");

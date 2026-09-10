@@ -9,23 +9,55 @@ import numpy as np
 from PIL import Image
 
 # ==============================
-# AI MODEL SETUP
+# AI MODEL CONFIGURATION
 # ==============================
+# Choose your active model:
+# "VIT" -> Vision Transformer (google/vit-base-patch16-224 - 92.99% Accuracy) [RECOMMENDED]
+# "CNN" -> Legacy CNN / VGG19 (hair_model.h5)
+ACTIVE_MODEL = "VIT"
+
+# 1. Vision Transformer Setup
+VIT_MODEL_PATH = "ai_model/hair_vit_model"
+vit_model = None
+vit_processor = None
+device = None
+
+try:
+    import torch
+    from transformers import AutoImageProcessor, AutoModelForImageClassification
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    if os.path.exists(VIT_MODEL_PATH):
+        vit_processor = AutoImageProcessor.from_pretrained(VIT_MODEL_PATH)
+        vit_model = AutoModelForImageClassification.from_pretrained(VIT_MODEL_PATH)
+        vit_model.to(device)
+        vit_model.eval()
+        print(f"✅ Vision Transformer (ViT) Model Loaded on {device}!")
+    else:
+        print(f"⚠️ ViT Model directory '{VIT_MODEL_PATH}' not found.")
+
+except Exception as e:
+    print(f"⚠️ Vision Transformer Loading Error: {e}")
+    vit_model = None
+    vit_processor = None
+
+# 2. Legacy CNN (VGG19) Setup
+CNN_MODEL_PATH = "ai_model/hair_model.h5"
+cnn_model = None
 
 try:
     import tensorflow as tf
 
-    MODEL_PATH = "ai_model/hair_model.h5"
-
-    if os.path.exists(MODEL_PATH):
-        hair_model = tf.keras.models.load_model(MODEL_PATH)
-        print("✅ AI Model Loaded Successfully!")
+    if os.path.exists(CNN_MODEL_PATH):
+        cnn_model = tf.keras.models.load_model(CNN_MODEL_PATH)
+        print("✅ Legacy CNN (VGG19) Model Loaded Successfully!")
     else:
-        hair_model = None
+        print(f"⚠️ CNN Model '{CNN_MODEL_PATH}' not found.")
 
 except Exception as e:
-    print(f"⚠️ AI Model Loading Error: {e}")
-    hair_model = None
+    print(f"⚠️ CNN Model Loading Error: {e}")
+    cnn_model = None
 
 router = APIRouter()
 
@@ -36,48 +68,88 @@ scan_collection = db["scans"]
 # ==============================
 
 def analyze_image_with_ai(image_path: str):
+    """
+    Analyzes a scalp image using either the Vision Transformer (ViT) or the Legacy CNN model
+    based on the ACTIVE_MODEL setting.
+    """
+    stage_mapping = {
+        0: "Norwood Stage 1",
+        1: "Norwood Stage 2",
+        2: "Norwood Stage 3",
+        3: "Norwood Stage 4",
+        4: "Norwood Stage 5",
+        5: "Norwood Stage 6",
+        6: "Norwood Stage 7"
+    }
 
-    if hair_model is None:
-        raise HTTPException(
-            status_code=503,
-            detail="Pretrained AI model is not available."
-        )
+    # ------------------------------------
+    # MODE 1: Vision Transformer (ViT)
+    # ------------------------------------
+    if ACTIVE_MODEL.upper() == "VIT":
+        if vit_model is None or vit_processor is None:
+            raise HTTPException(
+                status_code=503,
+                detail="Vision Transformer AI model is not loaded. Ensure ai_model/hair_vit_model exists."
+            )
 
-    try:
+        try:
+            import torch
+            img = Image.open(image_path).convert("RGB")
+            inputs = vit_processor(images=img, return_tensors="pt")
+            inputs = {k: v.to(device) for k, v in inputs.items()}
 
-        img = Image.open(image_path).convert("RGB")
+            with torch.no_grad():
+                outputs = vit_model(**inputs)
+                probabilities = torch.softmax(outputs.logits, dim=-1)
+                predicted_index = probabilities.argmax(dim=-1).item()
+                confidence = probabilities[0, predicted_index].item()
 
-        img = img.resize((224, 224))
+            stage_name = stage_mapping.get(predicted_index, f"Norwood Stage {predicted_index + 1}")
+            print(f"🔬 [ViT Analysis] {stage_name} (Confidence: {confidence * 100:.1f}%)")
+            return stage_name
 
-        img_array = np.array(img) / 255.0
+        except Exception as e:
+            print(f"ViT Prediction Error: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail="Error during Vision Transformer AI processing."
+            )
 
-        img_array = np.expand_dims(img_array, axis=0)
+    # ------------------------------------
+    # MODE 2: Legacy CNN (VGG19)
+    # ------------------------------------
+    elif ACTIVE_MODEL.upper() == "CNN":
+        if cnn_model is None:
+            raise HTTPException(
+                status_code=503,
+                detail="Legacy CNN AI model is not loaded. Ensure ai_model/hair_model.h5 exists."
+            )
 
-        predictions = hair_model.predict(img_array)
+        try:
+            img = Image.open(image_path).convert("RGB")
+            img = img.resize((224, 224))
+            img_array = np.array(img) / 255.0
+            img_array = np.expand_dims(img_array, axis=0)
 
-        class_names = [
-            "Norwood Stage 1",
-            "Norwood Stage 2",
-            "Norwood Stage 3",
-            "Norwood Stage 4",
-            "Norwood Stage 5",
-            "Norwood Stage 6",
-            "Norwood Stage 7"
-        ]
+            predictions = cnn_model.predict(img_array)
+            predicted_index = int(np.argmax(predictions[0]))
+            confidence = float(predictions[0][predicted_index])
 
-        predicted_index = np.argmax(predictions[0])
+            stage_name = stage_mapping.get(predicted_index, f"Norwood Stage {predicted_index + 1}")
+            print(f"🔬 [CNN Analysis] {stage_name} (Confidence: {confidence * 100:.1f}%)")
+            return stage_name
 
-        if predicted_index < len(class_names):
-            return class_names[predicted_index]
+        except Exception as e:
+            print(f"CNN Prediction Error: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail="Error during CNN AI processing."
+            )
 
-        return "Analysis Complete"
-
-    except Exception as e:
-        print(f"Prediction Error: {e}")
-
+    else:
         raise HTTPException(
             status_code=500,
-            detail="Error during AI processing."
+            detail=f"Unknown ACTIVE_MODEL: '{ACTIVE_MODEL}'. Please set to 'VIT' or 'CNN'."
         )
 
 # ==============================
