@@ -159,7 +159,7 @@ export default function ScanUploadCard({ patientName, selectedDoctorId, selected
                   onClick={handleSubmit}
                   disabled={!selectedDoctorId}
                 >
-                  Start Analysis
+                  Send to Dr. {selectedDoctorName}
                 </button>
               </>
             )}

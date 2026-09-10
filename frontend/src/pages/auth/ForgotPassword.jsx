@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './ForgotPassword.module.css';
 
 export default function ForgotPassword() {
@@ -46,16 +46,39 @@ export default function ForgotPassword() {
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <button onClick={() => navigate('/login')} className={styles.backBtn}>← Back to Login</button>
-        <h2>Forgot Password?</h2>
-        <p>Enter your email below to receive a reset link.</p>
+        <Link to="/login" className={styles.backBtn}>
+          <span className={styles.backArrow}>←</span> Back to Login
+        </Link>
+
+        <div className={styles.cardHeader}>
+          <div className={styles.iconCircle}>🔐</div>
+          <h2>Forgot Password?</h2>
+          <p>Enter your registered email address and we will send you a secure link to reset your password.</p>
+        </div>
+
         <form onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>
-            <label>Email Address</label>
-            <input type="email" placeholder="registered@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <label>Registered Email Address</label>
+            <input
+              type="email"
+              placeholder="e.g. doctor@hospital.com / user@gmail.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
-          <button type="submit" className={styles.submitBtn} disabled={loading}>{loading ? "Checking..." : "Send Reset Link"}</button>
+
+          <button type="submit" className={styles.submitBtn} disabled={loading}>
+            {loading ? "Sending Reset Link..." : "Send Reset Link"}
+          </button>
         </form>
+
+        <div className={styles.cardFooter}>
+          <span>Remember your password?</span>
+          <Link to="/login" className={styles.inlineLoginLink}>
+            Log In
+          </Link>
+        </div>
       </div>
     </div>
   );

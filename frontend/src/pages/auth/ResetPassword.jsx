@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import styles from './ResetPassword.module.css';
@@ -41,28 +41,67 @@ export default function ResetPassword() {
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <h2>Set New Password</h2>
-        <p>Create a secure password for your account.</p>
+        <Link to="/login" className={styles.backBtn}>
+          <span className={styles.backArrow}>←</span> Back to Login
+        </Link>
+
+        <div className={styles.cardHeader}>
+          <div className={styles.iconCircle}>🔑</div>
+          <h2>Set New Password</h2>
+          <p>Create a secure password for your account.</p>
+        </div>
+
         <form onSubmit={handleReset}>
           <div className={styles.inputGroup}>
             <label>New Password</label>
-            <input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input 
+              type="password" 
+              placeholder="••••••••" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              required 
+            />
             <div className={styles.passwordRequirements}>
-              <div className={passwordChecks.length ? styles.valid : styles.invalid}>{passwordChecks.length ? '✓' : '○'} 8+ Chars</div>
-              <div className={passwordChecks.upper ? styles.valid : styles.invalid}>{passwordChecks.upper ? '✓' : '○'} Uppercase</div>
-              <div className={passwordChecks.lower ? styles.valid : styles.invalid}>{passwordChecks.lower ? '✓' : '○'} Lowercase</div>
-              <div className={passwordChecks.number ? styles.valid : styles.invalid}>{passwordChecks.number ? '✓' : '○'} Number</div>
-              <div className={passwordChecks.special ? styles.valid : styles.invalid}>{passwordChecks.special ? '✓' : '○'} Special</div>
+              <div className={passwordChecks.length ? styles.valid : styles.invalid}>
+                {passwordChecks.length ? '✓' : '○'} 8+ Chars
+              </div>
+              <div className={passwordChecks.upper ? styles.valid : styles.invalid}>
+                {passwordChecks.upper ? '✓' : '○'} Uppercase
+              </div>
+              <div className={passwordChecks.lower ? styles.valid : styles.invalid}>
+                {passwordChecks.lower ? '✓' : '○'} Lowercase
+              </div>
+              <div className={passwordChecks.number ? styles.valid : styles.invalid}>
+                {passwordChecks.number ? '✓' : '○'} Number
+              </div>
+              <div className={passwordChecks.special ? styles.valid : styles.invalid}>
+                {passwordChecks.special ? '✓' : '○'} Special
+              </div>
             </div>
           </div>
+
           <div className={styles.inputGroup}>
             <label>Confirm Password</label>
-            <input type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+            <input 
+              type="password" 
+              placeholder="••••••••" 
+              value={confirmPassword} 
+              onChange={(e) => setConfirmPassword(e.target.value)} 
+              required 
+            />
           </div>
+
           <button type="submit" className={styles.submitBtn} disabled={loading || !isPasswordSecure}>
-            {loading ? "Updating..." : "Update Password"}
+            {loading ? "Updating Password..." : "Update Password"}
           </button>
         </form>
+
+        <div className={styles.cardFooter}>
+          <span>Remember your password?</span>
+          <Link to="/login" className={styles.inlineLoginLink}>
+            Log In
+          </Link>
+        </div>
       </div>
     </div>
   );
