@@ -30,8 +30,8 @@ app.include_router(doctor_router, prefix="/api/doctor", tags=["Doctor"])
 
 @app.on_event("startup")
 async def startup_db_client():
-    print("🚀 FastAPI Server Started!")
-    print("🔌 Database connected successfully.")
+    print("FastAPI Server Started!")
+    print("Database connected successfully.")
 
 @app.get("/")
 async def root():

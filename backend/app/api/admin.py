@@ -21,11 +21,11 @@ def send_status_email(to_email: str, doctor_name: str, status: str):
     smtp_port = int(os.getenv("MAIL_PORT", 587))
 
     if not sender_email or not sender_password:
-        print("⚠️ Email credentials (MAIL_USERNAME/MAIL_PASSWORD) not configured in .env. Skipping email notification.")
+        print("Email credentials (MAIL_USERNAME/MAIL_PASSWORD) not configured in .env. Skipping email notification.")
         return False
 
     if not to_email:
-        print("⚠️ No recipient email provided. Skipping email.")
+        print("No recipient email provided. Skipping email.")
         return False
 
     if status == "Approved":
@@ -67,10 +67,10 @@ Hair Follicle Detection AI Team"""
         server.login(sender_email, sender_password)
         server.send_message(msg)
         server.quit()
-        print(f"✅ Status email successfully sent to {to_email}")
+        print(f"Status email successfully sent to {to_email}")
         return True
     except Exception as e:
-        print(f"⚠️ Email sending failed: {e}. (Database status was updated successfully)")
+        print(f"Email sending failed: {e}. (Database status was updated successfully)")
         return False
 
 

@@ -13,4 +13,4 @@ user_collection = db.users
 scan_collection = db.scans
 report_collection = db.reports
 
-print(f"✅ Database client configured for: {MONGO_URL.split('@')[-1] if '@' in MONGO_URL else MONGO_URL}")
+print(f"Database client configured for: {MONGO_URL.split('@')[-1] if '@' in MONGO_URL else MONGO_URL}")

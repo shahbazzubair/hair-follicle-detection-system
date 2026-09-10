@@ -33,12 +33,12 @@ try:
         vit_model = AutoModelForImageClassification.from_pretrained(VIT_MODEL_PATH)
         vit_model.to(device)
         vit_model.eval()
-        print(f"✅ Vision Transformer (ViT) Model Loaded on {device}!")
+        print(f"Vision Transformer (ViT) Model Loaded on {device}!")
     else:
-        print(f"⚠️ ViT Model directory '{VIT_MODEL_PATH}' not found.")
+        print(f"ViT Model directory '{VIT_MODEL_PATH}' not found.")
 
 except Exception as e:
-    print(f"⚠️ Vision Transformer Loading Error: {e}")
+    print(f"Vision Transformer Loading Error: {e}")
     vit_model = None
     vit_processor = None
 
@@ -51,12 +51,12 @@ try:
 
     if os.path.exists(CNN_MODEL_PATH):
         cnn_model = tf.keras.models.load_model(CNN_MODEL_PATH)
-        print("✅ Legacy CNN (VGG19) Model Loaded Successfully!")
+        print("Legacy CNN (VGG19) Model Loaded Successfully!")
     else:
-        print(f"⚠️ CNN Model '{CNN_MODEL_PATH}' not found.")
+        print(f"CNN Model '{CNN_MODEL_PATH}' not found.")
 
 except Exception as e:
-    print(f"⚠️ CNN Model Loading Error: {e}")
+    print(f"CNN Model Loading Error: {e}")
     cnn_model = None
 
 router = APIRouter()

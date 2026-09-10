@@ -122,7 +122,7 @@ Hair Follicle Detection AI Team"""
         server.login(sender_email, sender_password)
         server.send_message(msg)
         server.quit()
-        print(f"✅ Reset email successfully sent to {to_email}")
+        print(f"Reset email successfully sent to {to_email}")
         return True
     except smtplib.SMTPAuthenticationError:
         raise HTTPException(
