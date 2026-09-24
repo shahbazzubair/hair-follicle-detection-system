@@ -97,10 +97,20 @@ export default function PatientDashboard() {
         didOpen: () => Swal.showLoading(),
       });
 
+      const docName = report.doctorName || report.assignedDoctor || "";
+      const matchedDoctor = doctors.find(
+        (d) =>
+          d.fullName?.trim().toLowerCase() === docName.trim().toLowerCase() ||
+          `Dr. ${d.fullName}`.trim().toLowerCase() === docName.trim().toLowerCase() ||
+          d.id === report.doctorId
+      );
+
       await generateClinicalReportPDF({
         ...report,
         patientName: userName || "Patient",
-        doctorName: report.doctorName || "Specialist",
+        doctorName: docName || matchedDoctor?.fullName || "Specialist",
+        doctorSpeciality: matchedDoctor?.speciality || "Hair Restoration Specialist",
+        signatureImage: matchedDoctor?.signatureImage || null,
       });
 
       Swal.close();

@@ -223,3 +223,6 @@ backend/static/uploads/
 *.bin
 *.pt
 *.pth
+
+# Scratch & temporary migration scripts
+scratch/

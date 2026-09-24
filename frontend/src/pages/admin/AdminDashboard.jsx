@@ -2,10 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { useTheme } from "../../context/ThemeContext";
+import { API_BASE_URL, assetUrl } from "../../config/api";
+import logoImg from "../../assets/logo.jpg";
 import styles from "./AdminDashboard.module.css";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState("doctors");
   const [loading, setLoading] = useState(true);
@@ -22,7 +26,7 @@ export default function AdminDashboard() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:8000/api/admin/users");
+      const response = await axios.get(`${API_BASE_URL}/api/admin/users`);
       setUsers(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Fetch error:", error);
@@ -46,9 +50,9 @@ export default function AdminDashboard() {
     if (result.isConfirmed) {
       try {
         if (action === "delete") {
-          await axios.delete(`http://localhost:8000/api/admin/delete-user/${userId}`);
+          await axios.delete(`${API_BASE_URL}/api/admin/delete-user/${userId}`);
         } else {
-          await axios.put(`http://localhost:8000/api/admin/verify-doctor/${userId}`, { status });
+          await axios.put(`${API_BASE_URL}/api/admin/verify-doctor/${userId}`, { status });
         }
         Swal.fire("Success!", "Action completed.", "success");
         fetchUsers();
@@ -79,7 +83,10 @@ export default function AdminDashboard() {
     <div className={styles.adminContainer}>
       {/* SIDEBAR */}
       <aside className={styles.sidebar}>
-        <div className={styles.logo}>HFD Admin</div>
+        <div className={styles.sidebarLogoWrap}>
+          <img src={logoImg} alt="HFD AI Logo" className={styles.sidebarLogoImg} />
+          <div className={styles.logo}>HFD Admin</div>
+        </div>
         <nav className={styles.nav}>
           <div className={styles.navItemActive}>
             👥 Management
@@ -94,8 +101,19 @@ export default function AdminDashboard() {
       <main className={styles.mainContent}>
         <header className={styles.header}>
           <h2>User Management</h2>
-          <div className={styles.adminProfile}>
-            Admin: {localStorage.getItem("userName") || "System Administrator"}
+          <div className={styles.headerRight}>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className={styles.themeToggleBtn}
+              title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+              aria-label="Toggle Theme"
+            >
+              {theme === "light" ? "🌙" : "☀️"}
+            </button>
+            <div className={styles.adminProfile}>
+              Admin: {localStorage.getItem("userName") || "System Administrator"}
+            </div>
           </div>
         </header>
 
@@ -152,7 +170,7 @@ export default function AdminDashboard() {
                     filteredUsers.map((user) => (
                       <tr key={user.id}>
                         <td>{user.fullName || "N/A"}</td>
-                        <td>{user.email || "N/A"}</td>
+                        <td className={styles.emailCell}>{user.email || "N/A"}</td>
                         <td>{user.phone || "N/A"}</td>
                         <td>
                           {user.role === "doctor" ? (
@@ -161,7 +179,7 @@ export default function AdminDashboard() {
                               <br />
                               {user.degree_path ? (
                                 <a
-                                  href={`http://localhost:8000${user.degree_path}`}
+                                  href={assetUrl(user.degree_path)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className={styles.degreeLink}

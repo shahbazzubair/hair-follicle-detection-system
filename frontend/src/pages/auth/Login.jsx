@@ -2,6 +2,7 @@ import  { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2'; 
+import { API_BASE_URL } from '../../config/api';
 import styles from './Login.module.css';
 
 export default function Login() {
@@ -16,7 +17,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/auth/login', {
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
         email,
         password
       });

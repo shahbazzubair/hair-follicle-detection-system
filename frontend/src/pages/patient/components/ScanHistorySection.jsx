@@ -52,7 +52,7 @@ export default function ScanHistorySection({ scans, reports, loading, error, onR
             className={styles.iconBtn}
             title="Download PDF report"
             aria-label="Download PDF report"
-            onClick={() => onDownload(row.report)}
+            onClick={() => onDownload({ ...row.report, hairfallDescription: row.hairfallDescription })}
           >
             ⬇
           </button>

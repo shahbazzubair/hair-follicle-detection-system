@@ -46,11 +46,19 @@ export default function AnalysisReportModal({ row, onClose, onDownload }) {
               <span>Date of Analysis</span>
               <strong>{formatDateTime(row.date)}</strong>
             </div>
+            {row.hairfallDescription && (
+              <div className={styles.modalDetailRow} style={{ flexDirection: "column", alignItems: "flex-start", gap: "6px" }}>
+                <span>Patient Reported Condition:</span>
+                <strong style={{ fontWeight: "500", fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: "1.4" }}>
+                  "{row.hairfallDescription}"
+                </strong>
+              </div>
+            )}
           </div>
         </div>
 
         <div className={styles.modalActions}>
-          <button type="button" className={styles.primaryBtn} onClick={() => onDownload(report)}>
+          <button type="button" className={styles.primaryBtn} onClick={() => onDownload({ ...report, hairfallDescription: row.hairfallDescription })}>
             Download PDF
           </button>
         </div>

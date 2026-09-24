@@ -1,16 +1,16 @@
 .navbar {
   width: 100%;
   height: 80px;
-  background: #a0c9f1;
+  background: var(--navbar-bg);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid #dbeafe;
+  border-bottom: 1px solid var(--navbar-border);
   display: flex;
   align-items: center;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
 .container {
@@ -21,59 +21,137 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 100%;
 }
 
 .logo {
-  font-size: 1.7rem;
+  font-size: 1.65rem;
   font-weight: 800;
-  color: #111827;
+  color: var(--navbar-text);
   text-decoration: none;
   letter-spacing: -0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.logo span {
-  color: #2563eb;
+.logo span span {
+  color: var(--accent-primary);
+}
+
+.logoImg {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+  border: 1.5px solid rgba(56, 189, 248, 0.4);
+  flex-shrink: 0;
 }
 
 .rightSection {
   display: flex;
   align-items: center;
-  gap: 40px;
+  height: 100%;
 }
 
 .authButtons {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 14px;
+  height: 100%;
+}
+
+/* Theme Toggle Button */
+.themeToggleBtn {
+  height: 42px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-color);
+  color: var(--navbar-text);
+  padding: 0 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+.themeToggleBtn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.themeIcon {
+  font-size: 1.05rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.themeLabel {
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1;
+  color: inherit;
 }
 
 .activeBtn {
+  height: 42px;
   text-decoration: none;
-  background: #2563eb;
-  color: white !important;
-  padding: 11px 24px;
-  border-radius: 10px;
-  font-weight: 600;
-  transition: 0.3s;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  background: var(--accent-primary);
+  color: #ffffff !important;
+  padding: 0 22px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+  box-sizing: border-box;
+  vertical-align: middle;
 }
 
 .activeBtn:hover {
-  transform: translateY(-2px);
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  opacity: 0.95;
 }
 
 .inactiveBtn {
+  height: 42px;
   text-decoration: none;
-  color: #111827;
-  font-weight: 600;
-  padding: 11px 24px;
-  border-radius: 10px;
-  transition: 0.3s;
+  color: var(--navbar-text);
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: 1.5px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+  vertical-align: middle;
 }
 
 .inactiveBtn:hover {
-  background: rgba(37, 99, 235, 0.08);
-  color: #2563eb;
+  background: var(--accent-soft);
+  border-color: var(--border-color);
+  color: var(--accent-primary);
+  transform: translateY(-1px);
 }
 
 .menuIcon {
@@ -87,14 +165,19 @@
 .bar {
   width: 25px;
   height: 3px;
-  background-color: #111827;
+  background-color: var(--navbar-text);
   transition: 0.3s;
   border-radius: 2px;
 }
 
 @media (max-width: 768px) {
-  .container { padding: 0 20px; }
-  .menuIcon { display: flex; }
+  .container { 
+    padding: 0 20px; 
+  }
+  
+  .menuIcon { 
+    display: flex; 
+  }
 
   .rightSection {
     position: fixed;
@@ -102,27 +185,33 @@
     left: -100%;
     width: 100%;
     height: calc(100vh - 80px);
-    background: #f8fafc;
+    background: var(--bg-card);
     flex-direction: column;
     justify-content: flex-start;
-    padding: 40px 0;
+    padding: 40px 20px;
     transition: 0.4s ease-in-out;
     gap: 30px;
     z-index: 999;
+    border-top: 1px solid var(--border-color);
   }
 
-  .showMenu { left: 0; }
+  .showMenu { 
+    left: 0; 
+  }
 
   .authButtons {
     flex-direction: column;
-    width: 85%;
+    width: 100%;
+    height: auto;
     gap: 15px;
   }
 
-  .activeBtn, .inactiveBtn {
+  .themeToggleBtn, .activeBtn, .inactiveBtn {
     width: 100%;
+    height: 48px;
+    justify-content: center;
     text-align: center;
-    padding: 15px;
+    padding: 0 16px;
   }
 
   .bar1 { transform: rotate(-45deg) translate(-5px, 6px); }

@@ -179,7 +179,8 @@ async def get_doctor_data(doctor_name: str):
             "date": scan.get("date"),
             "baldnessStage": scan.get("baldnessStage", ""),
             "doctorId": scan.get("doctorId"),
-            "isDirectAnalysis": scan.get("isDirectAnalysis", False)
+            "isDirectAnalysis": scan.get("isDirectAnalysis", False),
+            "hairfallDescription": scan.get("hairfallDescription", "")
         }
 
         if scan.get("status") == "Pending":
@@ -237,7 +238,8 @@ async def process_scan(scan_id: str):
 async def direct_analysis(
     doctorName: str = Form(...),
     patientName: str = Form(...),
-    image: UploadFile = File(...)
+    image: UploadFile = File(...),
+    hairfallDescription: str = Form("")
 ):
 
     upload_dir = "static/uploads/scans"
@@ -261,7 +263,8 @@ async def direct_analysis(
         "status": "Processed",
         "baldnessStage": ai_result,
         "isDirectAnalysis": True,
-        "date": datetime.utcnow().isoformat()
+        "date": datetime.utcnow().isoformat(),
+        "hairfallDescription": hairfallDescription.strip() if hairfallDescription else ""
     }
 
     await scan_collection.insert_one(scan_doc)
@@ -303,8 +306,9 @@ async def get_profile(doctor_name: str):
             "contactNumber",
             doctor.get("phone", "")
         ),
-         "about": doctor.get("about", ""),
+        "about": doctor.get("about", ""),
         "profileImage": doctor.get("profileImage", ""),
+        "signatureImage": doctor.get("signatureImage", ""),
         "weeklySchedule": doctor.get("weeklySchedule", [])
     }
 
@@ -334,6 +338,34 @@ async def upload_profile_image(
     return {
         "imagePath": f"/static/uploads/profile/{unique_filename}"
     }
+
+# ==============================
+# UPLOAD SIGNATURE IMAGE
+# ==============================
+
+@router.post("/upload-signature")
+async def upload_signature(
+    file: UploadFile = File(...)
+):
+
+    upload_dir = "static/uploads/signatures"
+
+    os.makedirs(upload_dir, exist_ok=True)
+
+    unique_filename = f"{uuid.uuid4()}_{file.filename}"
+
+    file_path = os.path.join(
+        upload_dir,
+        unique_filename
+    )
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return {
+        "signaturePath": f"/static/uploads/signatures/{unique_filename}"
+    }
+
 # ==============================
 # UPDATE DOCTOR PROFILE
 # ==============================
@@ -373,7 +405,8 @@ async def update_profile(data: dict):
         "phone": data.get("contactNumber", ""),
         "about": data.get("about", ""),
         "weeklySchedule": data.get("weeklySchedule", []),
-        "profileImage": data.get("profileImage", "")
+        "profileImage": data.get("profileImage", ""),
+        "signatureImage": data.get("signatureImage", "")
     }
 
     result = await db["users"].update_one(
@@ -391,6 +424,7 @@ async def update_profile(data: dict):
         "status": "success",
         "message": "Doctor profile updated successfully"
     }
+
 @router.get("/all-doctors")
 async def get_all_doctors():
 
@@ -416,12 +450,16 @@ async def get_all_doctors():
                 "phone",
                 ""
             ),
-             "about": doctor.get(
-                 "about", 
-                 ""
-           ),
+            "about": doctor.get(
+                "about", 
+                ""
+            ),
             "profileImage": doctor.get(
                 "profileImage",
+                ""
+            ),
+            "signatureImage": doctor.get(
+                "signatureImage",
                 ""
             ),
             "weeklySchedule": doctor.get(

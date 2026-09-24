@@ -1,36 +1,73 @@
 .adminWrapper {
-  background: #f0f7ff; /* Soft medical blue instead of dark slate */
+  background: var(--bg-page-tint);
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.themeToggleWrap {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+}
+
+.themeToggleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 1.25rem;
+  cursor: pointer;
+  box-shadow: var(--card-shadow);
+  transition: all 0.25s ease;
+}
+
+.themeToggleBtn:hover {
+  transform: scale(1.08);
+  border-color: var(--accent-primary);
 }
 
 .loginCard {
-  background: #ffffff;
-  padding: 50px;
-  border-radius: 16px;
+  background: var(--bg-card);
+  padding: 50px 40px;
+  border-radius: 20px;
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Softer shadow */
-  border: 1px solid #e2e8f0;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
 }
 
-.lockIcon { 
-  font-size: 3rem; 
-  margin-bottom: 20px; 
+.cardLogoImg {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  object-fit: cover;
+  margin-bottom: 20px;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+  border: 2px solid rgba(56, 189, 248, 0.45);
 }
 
 .loginCard h2 { 
-  color: #0f172a; /* Matching your title text color */
+  color: var(--text-primary);
   margin-bottom: 10px; 
+  font-size: 1.5rem;
+  font-weight: 800;
 }
 
 .loginCard p { 
-  color: #64748b; 
+  color: var(--text-muted); 
   margin-bottom: 30px; 
-  font-size: 0.9rem; 
+  font-size: 0.92rem; 
+  line-height: 1.5;
 }
 
 .form { 
@@ -42,35 +79,44 @@
 .inputGroup input {
   width: 100%;
   padding: 14px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
   outline: none;
-  background: #f8fafc;
-  font-size: 1rem;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  font-family: inherit;
 }
 
 .inputGroup input:focus {
-  border-color: #2563eb;
+  border-color: var(--border-focus);
+  background: var(--bg-input-focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .loginBtn {
-  background: #2563eb; /* Primary blue to match landing page */
-  color: white;
+  background: var(--accent-primary);
+  color: #ffffff;
   padding: 14px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
-  transition: opacity 0.2s;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
 }
 
-.loginBtn:hover { 
-  opacity: 0.9; 
+.loginBtn:hover:not(:disabled) { 
+  background: var(--accent-hover);
+  transform: translateY(-1px);
 }
 
 .loginBtn:disabled { 
-  background: #94a3b8; 
+  background: var(--border-color);
+  color: var(--text-muted);
   box-shadow: none;
+  cursor: not-allowed;
 }

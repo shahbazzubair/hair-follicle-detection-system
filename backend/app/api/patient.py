@@ -41,7 +41,8 @@ async def get_patient_data(username: str):
             "doctorName": scan.get("doctorName"),
             "imagePath": scan.get("imagePath"),
             "status": scan.get("status"),
-            "date": scan.get("date")
+            "date": scan.get("date"),
+            "hairfallDescription": scan.get("hairfallDescription", "")
         }
         formatted_scans.append(scan_data)
         
@@ -52,7 +53,8 @@ async def get_patient_data(username: str):
                 "doctorName": scan.get("doctorName"),
                 "imagePath": scan.get("imagePath"),   # NEW
                 "baldnessStage": scan.get("baldnessStage", "Results Pending"),
-                "date": scan.get("date")
+                "date": scan.get("date"),
+                "hairfallDescription": scan.get("hairfallDescription", "")
             })
             
     return {"scans": formatted_scans, "reports": formatted_reports}
@@ -61,7 +63,8 @@ async def get_patient_data(username: str):
 async def upload_scan(
     patientName: str = Form(...),
     doctorId: str = Form(...),
-    image: UploadFile = File(...)
+    image: UploadFile = File(...),
+    hairfallDescription: str = Form("")
 ):
     # Enhanced: Safeguard against malformed or missing BSON ObjectIds
     if not ObjectId.is_valid(doctorId):
@@ -69,7 +72,7 @@ async def upload_scan(
 
     doctor = await user_collection.find_one({"_id": ObjectId(doctorId)})
     if not doctor:
-        raise HTTPException(status_code=44, detail="Selected doctor does not exist.")
+        raise HTTPException(status_code=404, detail="Selected doctor does not exist.")
         
     doctor_name = doctor.get("fullName", "Unknown")
 
@@ -89,7 +92,8 @@ async def upload_scan(
         "doctorName": doctor_name,
         "imagePath": file_path,
         "status": "Pending",
-        "date": datetime.utcnow().isoformat()
+        "date": datetime.utcnow().isoformat(),
+        "hairfallDescription": hairfallDescription.strip() if hairfallDescription else ""
     }
     await scan_collection.insert_one(scan_doc)
     

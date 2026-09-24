@@ -1,12 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 .pageWrapper {
-  background: #f8fafc;
+  background: var(--bg-primary);
   min-height: 100vh;
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* FIXED: Added 120px top padding so the fixed Navbar doesn't overlap the title */
 .methodologySection {
   padding: 120px 20px 80px 20px; 
 }
@@ -19,14 +18,14 @@
 .mainTitle {
   font-size: 2.8rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
   margin-bottom: 15px;
   letter-spacing: -0.5px;
 }
 
 .subTitle {
   font-size: 1.15rem;
-  color: #64748b;
+  color: var(--text-muted);
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;
@@ -51,15 +50,15 @@
 }
 
 .roleBadgePatient {
-  background: #eff6ff;
-  color: #2563eb;
-  border-left: 5px solid #2563eb;
+  background: var(--accent-soft);
+  color: var(--accent-primary);
+  border-left: 5px solid var(--accent-primary);
 }
 
 .roleBadgeDoctor {
-  background: #f0fdf4;
-  color: #16a34a;
-  border-left: 5px solid #16a34a;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border-left: 5px solid #10b981;
 }
 
 /* --- Workflow Grid & Cards --- */
@@ -71,52 +70,50 @@
 
 .stepCard {
   display: flex;
-  background: #ffffff;
+  background: var(--bg-card);
   padding: 35px 40px;
   border-radius: 24px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   align-items: center;
   gap: 50px;
-  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);
+  box-shadow: var(--card-shadow);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .stepCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
-  border-color: #cbd5e1;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  border-color: var(--accent-primary);
 }
 
-/* FIXED: Text now takes up ~40% of the space, leaving room for the image */
 .stepInfo {
   flex: 1; 
 }
 
 .stepInfo h3 {
   font-size: 1.4rem;
-  color: #0f172a;
+  color: var(--text-primary);
   margin-bottom: 14px;
   font-weight: 800;
 }
 
 .stepInfo p {
-  color: #475569;
+  color: var(--text-secondary);
   line-height: 1.7;
   font-size: 1.05rem;
   font-weight: 500;
 }
 
-/* FIXED: Image container takes ~60% of the space and styles the screenshots cleanly */
 .stepVisual {
   flex: 1.5; 
-  background: #f8fafc;
+  background: var(--bg-input);
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 15px; /* Gives the screenshot a nice "frame" */
+  padding: 15px;
 }
 
 .stepVisual img {
@@ -125,7 +122,7 @@
   display: block;
   object-fit: contain;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05); /* Adds slight depth to the screenshot itself */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 /* --- Bottom Action Area --- */
@@ -134,13 +131,13 @@
   justify-content: center;
   margin-top: 80px;
   padding-top: 40px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-color);
 }
 
 .backBtn {
-  background: white;
-  color: #0f172a;
-  border: 2px solid #e2e8f0;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
   padding: 16px 36px;
   border-radius: 12px;
   font-weight: 700;
@@ -150,10 +147,10 @@
 }
 
 .backBtn:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--bg-input);
+  border-color: var(--accent-primary);
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* --- Responsive --- */

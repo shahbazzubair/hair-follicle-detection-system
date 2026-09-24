@@ -10,7 +10,7 @@ const Testimonials = () => {
       id: 1,
       name: "Dr. Usman Khalid",
       role: "Dermatologist",
-      text: "The VGG19 CNN model used here provides incredibly accurate follicle counts. It has significantly streamlined how I generate reports for my patients.",
+      text: "The VGG19 CNN and Vision Transformer models used here provides incredibly accurate follicle counts. It has significantly streamlined how I generate reports for my patients.",
       avatar: Usman
     },
     {

@@ -1,9 +1,11 @@
 import { assetUrl } from "../api";
-import { getInitials } from "../utils";
+import { formatTime12h, getInitials, normalizeSchedule } from "../utils";
 import styles from "../PatientDashboard.module.css";
 
 export default function SelectedDoctorCard({ doctor, onDeselect }) {
   if (!doctor) return null;
+
+  const activeSchedule = normalizeSchedule(doctor.weeklySchedule);
 
   return (
     <section className={`${styles.dashboardCard} ${styles.doctorDetailsCard} ${styles.popIn}`}>
@@ -42,15 +44,22 @@ export default function SelectedDoctorCard({ doctor, onDeselect }) {
       </div>
 
       <div className={styles.infoBlock}>
-        <h4>Availability</h4>
-        {doctor.weeklySchedule?.length > 0 ? (
+        <h4>Weekly Clinical Availability</h4>
+        {activeSchedule.length > 0 ? (
           <div className={styles.daysRow}>
-            {doctor.weeklySchedule.map((day) => (
-              <span key={day} className={styles.dayBadge}>{day}</span>
+            {activeSchedule.map((slot) => (
+              <div key={slot.day} className={styles.scheduleSlotChip}>
+                <span className={styles.scheduleSlotDay}>
+                  📅 {slot.day}
+                </span>
+                <span className={styles.scheduleSlotTime}>
+                  ⏰ {formatTime12h(slot.startTime)} – {formatTime12h(slot.endTime)}
+                </span>
+              </div>
             ))}
           </div>
         ) : (
-          <p className={styles.noDataMessage}>Availability not shared yet.</p>
+          <p className={styles.noDataMessage}>Availability schedule not shared yet.</p>
         )}
       </div>
 

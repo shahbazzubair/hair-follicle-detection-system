@@ -1,8 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL, assetUrl } from "../../config/api";
 
-export const API_BASE_URL = "http://localhost:8000";
-
-export const assetUrl = (path) => (path ? `${API_BASE_URL}${path}` : "");
+export { API_BASE_URL, assetUrl };
 
 export const getAllDoctors = () =>
   axios.get(`${API_BASE_URL}/api/doctor/all-doctors`);

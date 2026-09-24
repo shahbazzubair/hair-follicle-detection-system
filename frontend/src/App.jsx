@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Outlet, useLocation } from "react-router-dom";
+import { ThemeProvider } from "./context/ThemeContext";
 
 // --- Layout Components ---
 import Navbar from "./components/Navbar/Navbar";
@@ -56,45 +57,47 @@ const MainLayout = () => {
 
 export default function App() {
   return (
-    <Router>
-      {/* AUTO SCROLL TO TOP */}
-      <ScrollToTopHelper />
+    <ThemeProvider>
+      <Router>
+        {/* AUTO SCROLL TO TOP */}
+        <ScrollToTopHelper />
 
-      <Routes>
-        {/* === PORTALS & DASHBOARDS (No Navbar/Footer) === */}
-        <Route path="/admin" element={<AdminLogin />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
-        <Route path="/patient-dashboard" element={<PatientDashboard />} />
-        <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+        <Routes>
+          {/* === PORTALS & DASHBOARDS (No Navbar/Footer) === */}
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/patient-dashboard" element={<PatientDashboard />} />
+          <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
 
-        {/* === MAIN WEBSITE (Wrapped with Navbar/Footer) === */}
-        <Route element={<MainLayout />}>
-          
-          {/* Landing & Info */}
-          <Route 
-            path="/" 
-            element={
-              <>
-                <Hero />
-                <Testimonials />
-              </>
-            } 
-          />
-          <Route path="/methodology" element={<Methodology />} />
+          {/* === MAIN WEBSITE (Wrapped with Navbar/Footer) === */}
+          <Route element={<MainLayout />}>
+            
+            {/* Landing & Info */}
+            <Route 
+              path="/" 
+              element={
+                <>
+                  <Hero />
+                  <Testimonials />
+                </>
+              } 
+            />
+            <Route path="/methodology" element={<Methodology />} />
 
-          {/* Authentication */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
+            {/* Authentication */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-          {/* Legal */}
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/contact" element={<Contact />} />
-          
-        </Route>
-      </Routes>
-    </Router>
+            {/* Legal */}
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/contact" element={<Contact />} />
+            
+          </Route>
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 }

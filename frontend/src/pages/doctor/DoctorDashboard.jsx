@@ -3,10 +3,58 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { generateClinicalReportPDF } from "../../utils/reportGenerator";
+import { useTheme } from "../../context/ThemeContext";
+import { API_BASE_URL, assetUrl } from "../../config/api";
+import logoImg from "../../assets/logo.jpg";
 import styles from "./DoctorDashboard.module.css";
+
+const DAYS_OF_WEEK = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+const initScheduleState = (rawSchedule) => {
+  return DAYS_OF_WEEK.map((day) => {
+    if (Array.isArray(rawSchedule)) {
+      const existing = rawSchedule.find((s) =>
+        typeof s === "string" ? s === day : s?.day === day
+      );
+      if (existing) {
+        if (typeof existing === "string") {
+          return { day, available: true, startTime: "09:00", endTime: "17:00" };
+        }
+        return {
+          day,
+          available: existing.available !== false,
+          startTime: existing.startTime || "09:00",
+          endTime: existing.endTime || "17:00",
+        };
+      }
+    }
+    return { day, available: false, startTime: "09:00", endTime: "17:00" };
+  });
+};
+
+const formatTime12h = (timeStr) => {
+  if (!timeStr) return "";
+  const parts = timeStr.split(":");
+  const h = parseInt(parts[0], 10);
+  const m = parseInt(parts[1] || "0", 10);
+  if (Number.isNaN(h)) return timeStr;
+  const ampm = h >= 12 ? "PM" : "AM";
+  const hour12 = h % 12 || 12;
+  const minute = Number.isNaN(m) ? "00" : String(m).padStart(2, "0");
+  return `${String(hour12).padStart(2, "0")}:${minute} ${ampm}`;
+};
 
 export default function DoctorDashboard() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const [activeTab, setActiveTab] = useState("queue");
   const [doctorName] = useState(localStorage.getItem("userName"));
@@ -18,6 +66,7 @@ export default function DoctorDashboard() {
 
   // DIRECT ANALYSIS STATES
   const [directPatientName, setDirectPatientName] = useState("");
+  const [directHairfallDescription, setDirectHairfallDescription] = useState("");
   const [directFile, setDirectFile] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [portalReports, setPortalReports] = useState([]);
@@ -31,8 +80,15 @@ export default function DoctorDashboard() {
   const [contactNumber, setContactNumber] = useState("");
   const [about, setAbout] = useState("");
 
-  const [weeklySchedule, setWeeklySchedule] = useState([]);
+  const [weeklySchedule, setWeeklySchedule] = useState(() => initScheduleState([]));
   const [profileFile, setProfileFile] = useState(null);
+
+  // SIGNATURE STUDIO STATES
+  const [signatureImage, setSignatureImage] = useState("");
+  const [signatureFile, setSignatureFile] = useState(null);
+  const [signatureMode, setSignatureMode] = useState("draw"); // "draw" | "upload"
+  const [isDrawing, setIsDrawing] = useState(false);
+  const canvasRef = React.useRef(null);
 
   useEffect(() => {
     if (localStorage.getItem("userRole") !== "doctor") {
@@ -49,7 +105,7 @@ export default function DoctorDashboard() {
 
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/doctor/data/${localStorage.getItem("userName")}`,
+        `${API_BASE_URL}/api/doctor/data/${localStorage.getItem("userName")}`,
       );
       const allReports = res.data.reports || [];
 
@@ -66,26 +122,123 @@ export default function DoctorDashboard() {
       setLoading(false);
     }
   };
+
   const fetchProfile = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/doctor/profile/${doctorName}`,
+        `${API_BASE_URL}/api/doctor/profile/${doctorName}`,
       );
 
       const doctor = res.data;
 
       setProfileImage(doctor.profileImage || "");
-
+      setSignatureImage(doctor.signatureImage || "");
       setSpeciality(doctor.speciality || doctor.specialization || "");
-
       setContactNumber(doctor.contactNumber || doctor.phone || "");
       setAbout(doctor.about || "");
-
-      setWeeklySchedule(doctor.weeklySchedule || []);
+      setWeeklySchedule(initScheduleState(doctor.weeklySchedule || []));
     } catch (err) {
       console.error(err);
     }
   };
+
+  const handleDayToggle = (dayName) => {
+    setWeeklySchedule((prev) =>
+      prev.map((s) => (s.day === dayName ? { ...s, available: !s.available } : s))
+    );
+  };
+
+  const handleTimeChange = (dayName, field, val) => {
+    setWeeklySchedule((prev) =>
+      prev.map((s) => (s.day === dayName ? { ...s, [field]: val } : s))
+    );
+  };
+
+  const handlePreset = (dayName, startTime, endTime) => {
+    setWeeklySchedule((prev) =>
+      prev.map((s) =>
+        s.day === dayName ? { ...s, available: true, startTime, endTime } : s
+      )
+    );
+  };
+
+  const showPatientNotes = (scan) => {
+    Swal.fire({
+      title: `📋 Patient Notes: ${scan.patientName}`,
+      html: `
+        <div style="text-align: left; background: #f8fafc; padding: 16px 20px; border-radius: 12px; margin-top: 10px; border: 1.5px solid #cbd5e1; color: #1e293b; font-size: 14px; line-height: 1.6;">
+          <div style="font-weight: 700; margin-bottom: 6px; color: #0284c7;">State of Hairfall &amp; Symptoms:</div>
+          <p style="margin: 0; color: #334155; white-space: pre-wrap;">${scan.hairfallDescription ? scan.hairfallDescription : "<em>No additional clinical notes provided by patient.</em>"}</p>
+        </div>
+      `,
+      icon: scan.hairfallDescription ? "info" : "question",
+      confirmButtonText: "Close Notes",
+      confirmButtonColor: "#0284c7",
+    });
+  };
+
+  // Canvas Drawing Handlers
+  const startDrawing = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.clientX ?? (e.touches && e.touches[0]?.clientX);
+    const clientY = e.clientY ?? (e.touches && e.touches[0]?.clientY);
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.clientX ?? (e.touches && e.touches[0]?.clientX);
+    const clientY = e.clientY ?? (e.touches && e.touches[0]?.clientY);
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#0f172a";
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    if (!isDrawing) return;
+    setIsDrawing(false);
+  };
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  const captureCanvasSignature = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dataUrl = canvas.toDataURL("image/png");
+    setSignatureImage(dataUrl);
+    setSignatureFile(null);
+    Swal.fire({
+      icon: "success",
+      title: "Signature Captured!",
+      text: "Click 'Save Profile' below to permanently apply this signature to your reports.",
+      timer: 2000,
+      showConfirmButton: false,
+    });
+  };
+
   const downloadReport = async (data) => {
     try {
       Swal.fire({
@@ -98,7 +251,10 @@ export default function DoctorDashboard() {
       await generateClinicalReportPDF({
         ...data,
         doctorName: doctorName || "Specialist",
-        assignedDoctor: doctorName
+        assignedDoctor: doctorName,
+        doctorSpeciality: speciality || "Hair Restoration Specialist",
+        signatureImage: signatureImage || null,
+        hairfallDescription: data.hairfallDescription || "",
       });
 
       Swal.close();
@@ -107,18 +263,19 @@ export default function DoctorDashboard() {
       Swal.fire("Error", `PDF Generation Failed: ${err?.message || "Please try again"}`, "error");
     }
   };
+
   const saveProfile = async () => {
     try {
       let uploadedImagePath = profileImage;
+      let uploadedSignaturePath = signatureImage;
 
-      // IMAGE UPLOAD
+      // 1. Upload Profile Image
       if (profileFile) {
         const formData = new FormData();
-
         formData.append("file", profileFile);
 
         const uploadRes = await axios.post(
-          "http://localhost:8000/api/doctor/upload-profile-image",
+          `${API_BASE_URL}/api/doctor/upload-profile-image`,
           formData,
           {
             headers: {
@@ -130,22 +287,61 @@ export default function DoctorDashboard() {
         uploadedImagePath = uploadRes.data.imagePath;
       }
 
-      // PROFILE SAVE
-      await axios.put("http://localhost:8000/api/doctor/update-profile", {
+      // 2. Upload Signature Image (File or Drawn Canvas Blob)
+      if (signatureFile) {
+        const sigData = new FormData();
+        sigData.append("file", signatureFile);
+
+        const sigRes = await axios.post(
+          `${API_BASE_URL}/api/doctor/upload-signature`,
+          sigData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          },
+        );
+
+        uploadedSignaturePath = sigRes.data.signaturePath;
+      } else if (signatureImage && signatureImage.startsWith("data:image")) {
+        const res = await fetch(signatureImage);
+        const blob = await res.blob();
+        const file = new File([blob], `sig_${Date.now()}.png`, { type: "image/png" });
+
+        const sigData = new FormData();
+        sigData.append("file", file);
+
+        const sigRes = await axios.post(
+          `${API_BASE_URL}/api/doctor/upload-signature`,
+          sigData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          },
+        );
+
+        uploadedSignaturePath = sigRes.data.signaturePath;
+      }
+
+      // 3. Save Doctor Profile
+      await axios.put(`${API_BASE_URL}/api/doctor/update-profile`, {
         doctorName,
         speciality,
         contactNumber,
         about,
         weeklySchedule,
         profileImage: uploadedImagePath,
+        signatureImage: uploadedSignaturePath,
       });
 
-      Swal.fire("Saved", "Profile Updated Successfully", "success");
+      Swal.fire("Saved", "Doctor profile & daily schedule updated successfully!", "success");
 
+      setProfileFile(null);
+      setSignatureFile(null);
       fetchProfile();
     } catch (err) {
       console.log(err);
-
       Swal.fire("Error", "Could not save profile", "error");
     }
   };
@@ -169,7 +365,7 @@ export default function DoctorDashboard() {
 
       try {
         await axios.put(
-          `http://localhost:8000/api/doctor/process-scan/${scan.id}`,
+          `${API_BASE_URL}/api/doctor/process-scan/${scan.id}`,
         );
 
         Swal.fire("Success", "Analysis Complete & Report Generated", "success");
@@ -207,10 +403,11 @@ export default function DoctorDashboard() {
     formData.append("doctorName", doctorName);
     formData.append("patientName", directPatientName);
     formData.append("image", directFile);
+    formData.append("hairfallDescription", directHairfallDescription);
 
     try {
       await axios.post(
-        "http://localhost:8000/api/doctor/direct-analysis",
+        `${API_BASE_URL}/api/doctor/direct-analysis`,
         formData,
         {
           headers: {
@@ -222,9 +419,11 @@ export default function DoctorDashboard() {
       Swal.fire("Success", "Direct analysis complete.", "success");
 
       setDirectPatientName("");
+      setDirectHairfallDescription("");
       setDirectFile(null);
 
-      document.getElementById("directFileInput").value = null;
+      const fileInput = document.getElementById("directFileInput");
+      if (fileInput) fileInput.value = null;
 
       fetchData();
     } catch (err) {
@@ -252,8 +451,11 @@ export default function DoctorDashboard() {
     <div className={styles.dashboardWrapper}>
       {/* SIDEBAR */}
       <aside className={styles.sidebar}>
-        <div className={styles.logo}>
-          HFD<span>AI</span>
+        <div className={styles.sidebarLogoWrap}>
+          <img src={logoImg} alt="HFD AI Logo" className={styles.sidebarLogoImg} />
+          <div className={styles.logo}>
+            HFD<span>AI</span>
+          </div>
         </div>
 
         <div className={styles.doctorBadge}>Clinical Portal</div>
@@ -286,15 +488,26 @@ export default function DoctorDashboard() {
       {/* MAIN CONTENT */}
       <main className={styles.mainContent}>
         <header className={styles.header}>
-          <h1>Welcome To The Doctor Dashboad</h1>
-          <p>Review patient scans and run AI diagnostics.</p>
+          <div className={styles.headerText}>
+            <h1>Welcome To The Doctor Dashboard</h1>
+            <p>Review patient scans and run AI diagnostics.</p>
+          </div>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className={styles.themeToggleBtn}
+            title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+            aria-label="Toggle Theme"
+          >
+            {theme === "light" ? "🌙" : "☀️"}
+          </button>
         </header>
         <div className={styles.profileSection}>
           <div className={styles.profileLeft}>
             <div className={styles.profileImageWrapper}>
               {profileImage ? (
                 <img
-                  src={`http://localhost:8000${profileImage}`}
+                  src={assetUrl(profileImage)}
                   alt="Doctor"
                   className={styles.profileImage}
                 />
@@ -317,7 +530,11 @@ export default function DoctorDashboard() {
                 </div>
 
                 <div className={styles.metaItem}>
-                  🗓 {weeklySchedule.length} Days Available
+                  🗓 {weeklySchedule.filter((s) => s.available).length} Days Available
+                </div>
+
+                <div className={styles.metaItem}>
+                  {signatureImage ? "🖋️ Custom E-Sign" : "🛡️ E-Seal Active"}
                 </div>
               </div>
             </div>
@@ -388,38 +605,210 @@ export default function DoctorDashboard() {
             </div>
 
             <div className={styles.scheduleWrapper}>
-              <h3 className={styles.scheduleTitle}>Weekly Availability</h3>
+              <h3 className={styles.scheduleTitle}>Weekly Clinical Availability &amp; Hours</h3>
+              <p className={styles.scheduleSubtitle}>
+                Set the specific hours you will be available for consultations on each day of the week.
+              </p>
 
               <div className={styles.scheduleGrid}>
-                {[
-                  "Monday",
-                  "Tuesday",
-                  "Wednesday",
-                  "Thursday",
-                  "Friday",
-                  "Saturday",
-                  "Sunday",
-                ].map((day) => (
-                  <div key={day} className={styles.scheduleCard}>
-                    <label className={styles.scheduleLabel}>
-                      <input
-                        type="checkbox"
-                        checked={weeklySchedule.includes(day)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setWeeklySchedule([...weeklySchedule, day]);
-                          } else {
-                            setWeeklySchedule(
-                              weeklySchedule.filter((d) => d !== day),
-                            );
-                          }
-                        }}
-                      />
+                {weeklySchedule.map((item) => (
+                  <div
+                    key={item.day}
+                    className={`${styles.scheduleCard} ${item.available ? styles.scheduleCardActive : ""}`}
+                  >
+                    <div className={styles.scheduleHeader}>
+                      <label className={styles.scheduleLabel}>
+                        <input
+                          type="checkbox"
+                          checked={item.available}
+                          onChange={() => handleDayToggle(item.day)}
+                        />
+                        <span>{item.day}</span>
+                      </label>
 
-                      <span>{day}</span>
-                    </label>
+                      <span className={item.available ? styles.scheduleBadgeOn : styles.scheduleBadgeOff}>
+                        {item.available ? "Available" : "Off"}
+                      </span>
+                    </div>
+
+                    {item.available && (
+                      <>
+                        <div className={styles.timeRangeWrapper}>
+                          <div className={styles.timeInputGroup}>
+                            <label className={styles.timeInputLabel}>Start Time (From)</label>
+                            <input
+                              type="time"
+                              className={styles.timePickerInput}
+                              value={item.startTime || "09:00"}
+                              onChange={(e) => handleTimeChange(item.day, "startTime", e.target.value)}
+                            />
+                          </div>
+
+                          <div className={styles.timeInputGroup}>
+                            <label className={styles.timeInputLabel}>End Time (To)</label>
+                            <input
+                              type="time"
+                              className={styles.timePickerInput}
+                              value={item.endTime || "17:00"}
+                              onChange={(e) => handleTimeChange(item.day, "endTime", e.target.value)}
+                            />
+                          </div>
+                        </div>
+
+                        <div className={styles.presetButtonsRow}>
+                          <button
+                            type="button"
+                            className={styles.presetBtn}
+                            onClick={() => handlePreset(item.day, "09:00", "17:00")}
+                            title="Set hours 09:00 AM to 05:00 PM"
+                          >
+                            Full Day (9–5)
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.presetBtn}
+                            onClick={() => handlePreset(item.day, "09:00", "13:00")}
+                            title="Set hours 09:00 AM to 01:00 PM"
+                          >
+                            Morning (9–1)
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.presetBtn}
+                            onClick={() => handlePreset(item.day, "16:00", "20:00")}
+                            title="Set hours 04:00 PM to 08:00 PM"
+                          >
+                            Evening (4–8)
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* DIGITAL SIGNATURE STUDIO */}
+            <div className={styles.signatureSectionWrapper}>
+              <div className={styles.sigSectionHeader}>
+                <div>
+                  <h3 className={styles.scheduleTitle} style={{ marginBottom: "4px" }}>
+                    🖋️ Clinical Digital Signature
+                  </h3>
+                  <p className={styles.sigSubtitle}>
+                    This signature will be embedded onto the official PDF medical reports generated for your patients.
+                  </p>
+                </div>
+                <div className={signatureImage ? styles.sigBadgeActive : styles.sigBadgeSeal}>
+                  {signatureImage ? "✓ Signature Configured" : "🛡️ Digital Seal Fallback"}
+                </div>
+              </div>
+
+              <div className={styles.sigModeTabs}>
+                <button
+                  type="button"
+                  className={signatureMode === "draw" ? styles.sigTabActive : styles.sigTab}
+                  onClick={() => setSignatureMode("draw")}
+                >
+                  ✍️ Draw Signature
+                </button>
+                <button
+                  type="button"
+                  className={signatureMode === "upload" ? styles.sigTabActive : styles.sigTab}
+                  onClick={() => setSignatureMode("upload")}
+                >
+                  📁 Upload Signature File
+                </button>
+              </div>
+
+              <div className={styles.sigContentContainer}>
+                {signatureMode === "draw" ? (
+                  <div className={styles.canvasContainer}>
+                    <div className={styles.canvasHeader}>
+                      <span>Draw your signature using mouse or stylus:</span>
+                      <button type="button" onClick={clearCanvas} className={styles.canvasClearBtn}>
+                        🔄 Clear Canvas
+                      </button>
+                    </div>
+                    <div className={styles.canvasWrapper}>
+                      <canvas
+                        ref={canvasRef}
+                        width={460}
+                        height={130}
+                        onMouseDown={startDrawing}
+                        onMouseMove={draw}
+                        onMouseUp={stopDrawing}
+                        onMouseLeave={stopDrawing}
+                        onTouchStart={startDrawing}
+                        onTouchMove={draw}
+                        onTouchEnd={stopDrawing}
+                        className={styles.signatureCanvas}
+                      />
+                    </div>
+                    <div className={styles.canvasActions}>
+                      <button
+                        type="button"
+                        onClick={captureCanvasSignature}
+                        className={styles.captureSigBtn}
+                      >
+                        ✓ Adopt & Set Drawn Signature
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className={styles.uploadSigContainer}>
+                    <label>Select Signature Image (PNG or JPG)</label>
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg, image/jpg"
+                      className={styles.profileInput}
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setSignatureFile(file);
+                          setSignatureImage(URL.createObjectURL(file));
+                        }
+                      }}
+                    />
+                    <span className={styles.sigHint}>
+                      Recommended: Transparent PNG image (~400x150px) for best clarity on clinical PDF reports.
+                    </span>
+                  </div>
+                )}
+
+                {/* SIGNATURE PREVIEW */}
+                <div className={styles.signaturePreviewBox}>
+                  <div className={styles.sigPreviewLabel}>
+                    Active Signature Preview on PDF:
+                  </div>
+                  {signatureImage ? (
+                    <div className={styles.activeSigDisplay}>
+                      <img
+                        src={assetUrl(signatureImage)}
+                        alt="Doctor Signature"
+                        className={styles.signatureImgPreview}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSignatureImage("");
+                          setSignatureFile(null);
+                        }}
+                        className={styles.removeSigBtn}
+                      >
+                        ✕ Remove Signature (Revert to Digital Seal)
+                      </button>
+                    </div>
+                  ) : (
+                    <div className={styles.noSigNotice}>
+                      <span className={styles.sealIcon}>🛡️</span>
+                      <div>
+                        <strong>Default Digital Verification Seal Active</strong>
+                        <p>No custom signature uploaded. Reports will feature a verified cryptographic E-Seal with unique verification hash.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -469,6 +858,7 @@ export default function DoctorDashboard() {
                       <tr>
                         <th>Patient Name</th>
                         <th>Date Submitted</th>
+                        <th>Patient Condition / Notes</th>
                         <th>Raw Image</th>
                         <th>Action</th>
                       </tr>
@@ -477,13 +867,28 @@ export default function DoctorDashboard() {
                     <tbody>
                       {scans.map((s, i) => (
                         <tr key={i}>
-                          <td>{s.patientName}</td>
+                          <td><strong>{s.patientName}</strong></td>
 
                           <td>{new Date(s.date).toLocaleDateString()}</td>
 
                           <td>
+                            {s.hairfallDescription ? (
+                              <button
+                                type="button"
+                                className={styles.notesBtn}
+                                onClick={() => showPatientNotes(s)}
+                                title="Click to view patient condition and symptoms"
+                              >
+                                💬 View Notes ({s.hairfallDescription.length > 18 ? `${s.hairfallDescription.slice(0, 18)}...` : s.hairfallDescription})
+                              </button>
+                            ) : (
+                              <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>—</span>
+                            )}
+                          </td>
+
+                          <td>
                             <a
-                              href={`http://localhost:8000${s.imagePath}`}
+                              href={assetUrl(s.imagePath)}
                               target="_blank"
                               rel="noreferrer"
                               className={styles.reviewLink}
@@ -602,7 +1007,7 @@ export default function DoctorDashboard() {
                   <input
                     type="text"
                     className={styles.inputField}
-                    placeholder=""
+                    placeholder="e.g. John Doe / PT-104"
                     value={directPatientName}
                     onChange={(e) => setDirectPatientName(e.target.value)}
                     required
@@ -622,10 +1027,22 @@ export default function DoctorDashboard() {
                   />
                 </div>
 
+                <div className={styles.inputGroup} style={{ gridColumn: "span 2" }}>
+                  <label>Patient Condition &amp; Hairfall State (Optional)</label>
+                  <input
+                    type="text"
+                    className={styles.inputField}
+                    placeholder="e.g., Crown thinning, diffuse shedding for 3 months..."
+                    value={directHairfallDescription}
+                    onChange={(e) => setDirectHairfallDescription(e.target.value)}
+                  />
+                </div>
+
                 <button
                   type="submit"
                   className={styles.processBtn}
                   disabled={isProcessing}
+                  style={{ gridColumn: "span 2" }}
                 >
                   {isProcessing
                     ? "🤖 AI is Analyzing..."

@@ -1,9 +1,9 @@
 .pageWrapper {
   min-height: 100vh;
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  background: var(--bg-page-tint);
   padding: 50px 20px 80px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .container {
@@ -19,7 +19,7 @@
 .badge {
   display: inline-block;
   padding: 6px 16px;
-  background: #dcfce7;
+  background: rgba(22, 163, 74, 0.15);
   color: #16a34a;
   font-weight: 600;
   font-size: 0.85rem;
@@ -32,14 +32,14 @@
 .title {
   font-size: 2.5rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0 0 12px;
   letter-spacing: -0.02em;
 }
 
 .subtitle {
   font-size: 1.05rem;
-  color: #64748b;
+  color: var(--text-muted);
   max-width: 650px;
   margin: 0 auto;
   line-height: 1.6;
@@ -59,19 +59,19 @@
 }
 
 .infoCard {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 16px;
   padding: 24px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
 }
 
 .infoIcon {
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: #f0f9ff;
-  color: #0284c7;
+  background: var(--accent-soft);
+  color: var(--accent-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -82,46 +82,47 @@
 .infoCard h3 {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0 0 6px;
 }
 
 .infoCard p {
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0 0 12px;
   line-height: 1.5;
 }
 
 .infoCard a {
-  color: #0284c7;
+  color: var(--accent-primary);
   font-weight: 600;
   font-size: 0.92rem;
   text-decoration: none;
 }
 
 .infoCard a:hover {
+  color: var(--accent-hover);
   text-decoration: underline;
 }
 
 .formCard {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 16px;
   padding: 36px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
 }
 
 .formCard h2 {
   font-size: 1.4rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0 0 8px;
 }
 
 .formCard p {
   font-size: 0.92rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0 0 24px;
 }
 
@@ -133,18 +134,18 @@
   display: block;
   font-size: 0.88rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--text-secondary);
   margin-bottom: 6px;
 }
 
 .formInput, .formSelect, .formTextarea {
   width: 100%;
   padding: 12px 16px;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid var(--border-color);
   border-radius: 10px;
   font-size: 0.95rem;
-  color: #0f172a;
-  background: #f8fafc;
+  color: var(--text-primary);
+  background: var(--bg-input);
   box-sizing: border-box;
   transition: all 0.2s ease;
   font-family: inherit;
@@ -152,9 +153,9 @@
 
 .formInput:focus, .formSelect:focus, .formTextarea:focus {
   outline: none;
-  border-color: #0284c7;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+  border-color: var(--border-focus);
+  background: var(--bg-input-focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .formTextarea {
@@ -165,7 +166,7 @@
 .submitBtn {
   width: 100%;
   padding: 14px;
-  background: #0284c7;
+  background: var(--accent-primary);
   color: #ffffff;
   border: none;
   border-radius: 10px;
@@ -176,12 +177,13 @@
 }
 
 .submitBtn:hover {
-  background: #0369a1;
+  background: var(--accent-hover);
   transform: translateY(-1px);
 }
 
 .submitBtn:disabled {
-  background: #94a3b8;
+  background: var(--border-color);
+  color: var(--text-muted);
   cursor: not-allowed;
   transform: none;
 }
@@ -194,7 +196,7 @@
   text-align: center;
   font-size: 1.8rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0 0 30px;
 }
 
@@ -205,22 +207,23 @@
 }
 
 .faqItem {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 22px;
+  box-shadow: var(--card-shadow);
 }
 
 .faqItem h4 {
   font-size: 1rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   margin: 0 0 8px;
 }
 
 .faqItem p {
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--text-muted);
   line-height: 1.6;
   margin: 0;
 }

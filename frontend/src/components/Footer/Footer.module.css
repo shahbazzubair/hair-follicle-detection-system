@@ -1,7 +1,7 @@
 .footer {
   width: 100%;
-  background-color: #a0c9f1;
-  border-top: 1px solid #e2e8f0;
+  background-color: var(--navbar-bg);
+  border-top: 1px solid var(--navbar-border);
   padding: 30px 0;
   margin-top: auto;
 }
@@ -13,8 +13,26 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: black;
+  color: var(--navbar-text);
   font-size: 0.9rem;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footerLogoImg {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  flex-shrink: 0;
 }
 
 .legalLinks {
@@ -24,12 +42,13 @@
 
 .legalLinks a {
   text-decoration: none;
-  color: black;
+  color: var(--navbar-text);
   transition: color 0.2s ease;
+  font-weight: 500;
 }
 
 .legalLinks a:hover {
-  color: #2563eb;
+  color: var(--accent-primary);
 }
 
 @media (max-width: 768px) {

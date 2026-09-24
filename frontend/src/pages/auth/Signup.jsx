@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2'; 
+import { API_BASE_URL } from '../../config/api';
 import styles from './Signup.module.css';
 
 // Validation Regex Constants
@@ -83,7 +84,7 @@ export default function Signup() {
     setLoading(true);
     try {
       if (role === 'patient') {
-        await axios.post('http://localhost:8000/api/auth/signup/patient', {
+        await axios.post(`${API_BASE_URL}/api/auth/signup/patient`, {
           fullName: formData.fullName.trim(),
           email: formData.email.trim(),
           phone: formData.phone.trim(),
@@ -98,7 +99,7 @@ export default function Signup() {
         doctorData.append("specialization", formData.specialization.trim());
         if (formData.degree) doctorData.append("degree", formData.degree);
         
-        await axios.post('http://localhost:8000/api/auth/signup/doctor', doctorData, { 
+        await axios.post(`${API_BASE_URL}/api/auth/signup/doctor`, doctorData, { 
           headers: { "Content-Type": "multipart/form-data" } 
         });
       }

@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { useTheme } from '../../context/ThemeContext';
+import { API_BASE_URL } from '../../config/api';
+import logoImg from '../../assets/logo.jpg';
 import styles from './AdminLogin.module.css'; 
 
 export default function AdminLogin() {
@@ -9,13 +12,14 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      const response = await axios.post('http://localhost:8000/api/auth/login', { 
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, { 
         email, 
         password 
       });
@@ -52,8 +56,20 @@ export default function AdminLogin() {
 
   return (
     <div className={styles.adminWrapper}>
+      <div className={styles.themeToggleWrap}>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className={styles.themeToggleBtn}
+          title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+          aria-label="Toggle Theme"
+        >
+          {theme === "light" ? "🌙" : "☀️"}
+        </button>
+      </div>
+
       <div className={styles.loginCard}>
-        <div className={styles.lockIcon}>🔐</div>
+        <img src={logoImg} alt="HFD AI Logo" className={styles.cardLogoImg} />
         <h2>HFD AI Control Center</h2>
         <p>Please enter administrative credentials to proceed.</p>
         

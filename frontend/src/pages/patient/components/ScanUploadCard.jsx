@@ -8,6 +8,7 @@ const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/jpg"];
 export default function ScanUploadCard({ patientName, selectedDoctorId, selectedDoctorName, onUploadSuccess }) {
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [hairfallDescription, setHairfallDescription] = useState("");
   const [status, setStatus] = useState("idle"); // idle | invalid | uploading | error
   const [progress, setProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
@@ -19,6 +20,7 @@ export default function ScanUploadCard({ patientName, selectedDoctorId, selected
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setFile(null);
     setPreviewUrl("");
+    setHairfallDescription("");
     setStatus("idle");
     setProgress(0);
     setErrorMessage("");
@@ -70,6 +72,7 @@ export default function ScanUploadCard({ patientName, selectedDoctorId, selected
     formData.append("patientName", patientName);
     formData.append("doctorId", selectedDoctorId);
     formData.append("image", file);
+    formData.append("hairfallDescription", hairfallDescription);
 
     try {
       await uploadScan(formData, (evt) => {
@@ -122,47 +125,72 @@ export default function ScanUploadCard({ patientName, selectedDoctorId, selected
           />
         </div>
       ) : (
-        <div className={styles.uploadPreviewRow}>
-          <img src={previewUrl} alt="Scan preview" className={styles.uploadPreviewImage} />
+        <div className={styles.uploadPreviewContainer}>
+          <div className={styles.uploadPreviewRow}>
+            <img src={previewUrl} alt="Scan preview" className={styles.uploadPreviewImage} />
 
-          <div className={styles.uploadPreviewInfo}>
-            <p className={styles.uploadFileName}>{file.name}</p>
-            <p className={styles.uploadFileMeta}>{formatFileSize(file.size)}</p>
+            <div className={styles.uploadPreviewInfo}>
+              <p className={styles.uploadFileName}>{file.name}</p>
+              <p className={styles.uploadFileMeta}>{formatFileSize(file.size)}</p>
 
-            <p className={styles.uploadTargetDoctor}>
-              {selectedDoctorId
-                ? `Send scan to Dr. ${selectedDoctorName}`
-                : "Select a doctor before starting the analysis"}
-            </p>
+              <p className={styles.uploadTargetDoctor}>
+                {selectedDoctorId
+                  ? `Send scan to Dr. ${selectedDoctorName}`
+                  : "Select a doctor before starting the analysis"}
+              </p>
 
-            {status === "uploading" && (
-              <div className={styles.progressBarTrack}>
-                <div className={styles.progressBarFill} style={{ width: `${progress}%` }} />
-                <span className={styles.progressBarLabel}>{progress}%</span>
-              </div>
-            )}
+              {status === "uploading" && (
+                <div className={styles.progressBarTrack}>
+                  <div className={styles.progressBarFill} style={{ width: `${progress}%` }} />
+                  <span className={styles.progressBarLabel}>{progress}%</span>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.uploadActions}>
+              {status === "uploading" ? (
+                <button type="button" className={styles.secondaryBtn} onClick={handleCancelUpload}>
+                  Cancel
+                </button>
+              ) : (
+                <>
+                  <button type="button" className={styles.secondaryBtn} onClick={resetSelection}>
+                    Remove
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.primaryBtn}
+                    onClick={handleSubmit}
+                    disabled={!selectedDoctorId}
+                  >
+                    Send to Dr. {selectedDoctorName}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
-          <div className={styles.uploadActions}>
-            {status === "uploading" ? (
-              <button type="button" className={styles.secondaryBtn} onClick={handleCancelUpload}>
-                Cancel
-              </button>
-            ) : (
-              <>
-                <button type="button" className={styles.secondaryBtn} onClick={resetSelection}>
-                  Remove
-                </button>
-                <button
-                  type="button"
-                  className={styles.primaryBtn}
-                  onClick={handleSubmit}
-                  disabled={!selectedDoctorId}
-                >
-                  Send to Dr. {selectedDoctorName}
-                </button>
-              </>
-            )}
+          {/* PATIENT HAIRFALL DESCRIPTION INPUT */}
+          <div className={styles.descriptionBox}>
+            <div className={styles.descriptionHeader}>
+              <label htmlFor="hairfall-notes" className={styles.descriptionLabel}>
+                📝 State of Hairfall &amp; Symptoms <span className={styles.recommendedBadge}>Recommended for Doctor</span>
+              </label>
+              <span className={styles.charCount}>{hairfallDescription.length}/300</span>
+            </div>
+            <textarea
+              id="hairfall-notes"
+              className={styles.descriptionTextarea}
+              rows={3}
+              maxLength={300}
+              disabled={status === "uploading"}
+              placeholder="e.g., Shedding heavily for the past 4 months, noticeable thinning around crown and receding hairline, scalp itching during hot weather..."
+              value={hairfallDescription}
+              onChange={(e) => setHairfallDescription(e.target.value)}
+            />
+            <p className={styles.descriptionHint}>
+              💡 This description helps your consulting doctor evaluate your condition more accurately.
+            </p>
           </div>
         </div>
       )}

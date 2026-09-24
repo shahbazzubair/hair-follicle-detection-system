@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { API_BASE_URL } from '../../config/api';
 import styles from './ResetPassword.module.css';
 
 export default function ResetPassword() {
@@ -28,7 +29,7 @@ export default function ResetPassword() {
 
     setLoading(true);
     try {
-      await axios.post(`http://localhost:8000/api/auth/reset-password/${token}`, { password });
+      await axios.post(`${API_BASE_URL}/api/auth/reset-password/${token}`, { password });
       Swal.fire('Success', 'Password updated successfully!', 'success');
       navigate('/login');
     } catch (err) {

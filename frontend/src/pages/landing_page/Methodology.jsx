@@ -137,7 +137,7 @@ export default function Methodology() {
           {/* --- BOTTOM ACTION --- */}
           <div className={styles.bottomAction}>
             <button onClick={() => navigate('/')} className={styles.backBtn}>
-              ← Return to Home
+              Return to Home
             </button>
           </div>
 

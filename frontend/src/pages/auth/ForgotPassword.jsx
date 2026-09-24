@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../../config/api';
 import styles from './ForgotPassword.module.css';
 
 export default function ForgotPassword() {
@@ -13,7 +14,7 @@ export default function ForgotPassword() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:8000/api/auth/forgot-password', { email: email.trim() });
+      const res = await axios.post(`${API_BASE_URL}/api/auth/forgot-password`, { email: email.trim() });
       
       Swal.fire({
         icon: 'success',
@@ -47,8 +48,9 @@ export default function ForgotPassword() {
     <div className={styles.container}>
       <div className={styles.card}>
         <Link to="/login" className={styles.backBtn}>
-          <span className={styles.backArrow}>←</span> Back to Login
-        </Link>
+  Back to Login
+</Link>
+
 
         <div className={styles.cardHeader}>
           <div className={styles.iconCircle}>🔐</div>

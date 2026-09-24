@@ -1,9 +1,10 @@
 import { assetUrl } from "../api";
-import { getInitials } from "../utils";
+import { getInitials, normalizeSchedule } from "../utils";
 import styles from "../PatientDashboard.module.css";
 
 export default function DoctorListItem({ doctor, isSelected, onSelect }) {
-  const hasSchedule = Array.isArray(doctor.weeklySchedule) && doctor.weeklySchedule.length > 0;
+  const activeSchedule = normalizeSchedule(doctor.weeklySchedule);
+  const hasSchedule = activeSchedule.length > 0;
 
   return (
     <div
@@ -35,7 +36,7 @@ export default function DoctorListItem({ doctor, isSelected, onSelect }) {
           <p>{doctor.speciality || "Hair Specialist"}</p>
           <span className={hasSchedule ? styles.availabilityDotOn : styles.availabilityDotOff}>
             <i />
-            {hasSchedule ? "Availability shared" : "Availability not set"}
+            {hasSchedule ? `${activeSchedule.length} days/week available` : "Availability not set"}
           </span>
         </div>
       </div>
