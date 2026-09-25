@@ -1,3 +1,5 @@
+import axios from "axios";
+
 /**
  * Centralized API Configuration
  * Reads VITE_API_BASE_URL from environment variables,
@@ -21,7 +23,9 @@ export const assetUrl = (path) => {
   return `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 };
 
-// Seamless tunnel header support (bypasses reminder pages on free tunnels)
+// Seamless tunnel header support for both Axios and Fetch
+axios.defaults.headers.common["Bypass-Tunnel-Reminder"] = "true";
+
 if (typeof window !== "undefined") {
   const originalFetch = window.fetch;
   window.fetch = async (resource, config = {}) => {
